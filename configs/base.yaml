@@ -1,0 +1,20 @@
+seed: 42
+data:
+  input_steps: 12
+  output_steps: 12
+  train_ratio: 0.7
+  val_ratio: 0.1
+  add_time_of_day: true
+  add_day_of_week: true
+training:
+  batch_size: 32
+  epochs: 100
+  patience: 15
+  learning_rate: 0.001
+  weight_decay: 0.0001
+evaluation:
+  horizons: [3, 6, 12]
+  missing_threshold: 0.0
+  outage_rates: [0.1, 0.2, 0.3, 0.4, 0.5]
+  conformal_alpha: 0.1
+
