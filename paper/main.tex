@@ -693,16 +693,24 @@ interval reliability, and selective risk to be audited separately.
     \draw[flow] (mask) -- (temporal);
     \draw[flow] (temporal) -- (graphblock);
 
-    \node[support] (static) at (10.5,-1.8) {static support $A^{(s)}$};
+    \node[support] (static) at (10.0,-1.8) {static support $A^{(s)}$};
     \node[support] (adaptive) at (13.2,-1.8) {adaptive support $A^{(a)}$};
-    \node[support] (reliability) at (15.9,-1.8) {reliability $r_{t,i}$};
-    \draw[flow] (static) -- (graphblock);
-    \draw[flow] (adaptive) -- (graphblock);
-    \draw[flow] (reliability) -- (graphblock);
+    \node[support] (reliability) at (16.4,-1.8) {reliability $r_{t,i}$};
+    % Each support uses its own orthogonal channel and a distinct graph-block
+    % anchor, preventing the converging arrows from crossing neighboring boxes.
+    \draw[flow] (static.north) -- ++(0,0.35)
+      -| ([xshift=-10mm]graphblock.south);
+    \draw[flow] (adaptive.north) -- (graphblock.south);
+    \draw[flow] (reliability.north) -- ++(0,0.35)
+      -| ([xshift=10mm]graphblock.south);
 
     \node[prob] (router) at (8.8,-3.8) {\textbf{5 Regime router}\\speed, variation, availability\\four expert weights $\pi_t$};
     \node[prob] (head) at (13.2,-3.8) {\textbf{6 Probabilistic head}\\persistence + history skip\\$\widehat{\mathbf Y}_t,\mathbf S_t$};
-    \draw[flow] (graphblock.south) -- ++(0,-0.45) -| (router.east);
+    % The router reads mask-aware origin statistics, whereas the graph state
+    % reaches the prediction head through a separate outer channel.
+    \draw[flow] (mask.south) -- ++(0,-3.25) -- (router.west);
+    \draw[flow] (graphblock.east) -- ++(3.6,0) -- ++(0,-2.8)
+      -| (head.north);
     \draw[flow] (router) -- (head);
 
     \node[label,magenta!75!black] at (-2.1,-6.6) {Training only};
