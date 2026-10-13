@@ -7,6 +7,8 @@ import numpy as np
 import pandas as pd
 from scipy.stats import wilcoxon
 
+from shiftguard.registry import REFERENCE_ABLATIONS, REFERENCE_MODEL
+
 
 PRIMARY_MODELS = (
     "persistence",
@@ -20,14 +22,7 @@ PRIMARY_MODELS = (
     "stid",
     "staeformer",
 )
-ABLATIONS = (
-    "shiftguard_noreliability",
-    "shiftguard_staticgraph",
-    "shiftguard_adaptivegraph",
-    "shiftguard_norouter",
-    "shiftguard_noaugmentation",
-    "shiftguard_independentaugmentation",
-)
+ABLATIONS = REFERENCE_ABLATIONS
 
 
 def holm_adjust(p_values: list[float]) -> list[float]:
@@ -48,7 +43,7 @@ def compare(
     rng: np.random.Generator,
 ) -> pd.DataFrame:
     rows: list[dict[str, object]] = []
-    proposed = frame[frame.model == "shiftguard"]
+    proposed = frame[frame.model == REFERENCE_MODEL]
     for dataset in sorted(frame.dataset.unique()):
         proposed_dataset = proposed[proposed.dataset == dataset]
         for competitor in competitors:
@@ -104,14 +99,14 @@ def main() -> None:
     args.output.mkdir(parents=True, exist_ok=True)
     raw = pd.read_csv(args.input)
     primary = raw[
-        raw.model.isin(("shiftguard", *PRIMARY_MODELS))
+        raw.model.isin((REFERENCE_MODEL, *PRIMARY_MODELS))
         & (raw.calibration == "group-prequential")
         & (raw.selection == "risk")
         & (raw.family != "clean")
         & raw.rate.isin((0.1, 0.2, 0.3, 0.4, 0.5))
     ]
     ablations = raw[
-        raw.model.isin(("shiftguard", *ABLATIONS))
+        raw.model.isin((REFERENCE_MODEL, *ABLATIONS))
         & (raw.calibration == "group-prequential")
         & (raw.selection == "risk")
         & (raw.family != "clean")

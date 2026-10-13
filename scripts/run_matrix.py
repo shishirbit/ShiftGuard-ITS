@@ -5,26 +5,12 @@ import subprocess
 import sys
 from pathlib import Path
 
+from train import MODEL_CHOICES
+
+from shiftguard.registry import REFERENCE_MODEL
+
 DATASETS = ("METR-LA", "PEMS-BAY")
-MODELS = (
-    "persistence",
-    "linear",
-    "mlp",
-    "gru",
-    "stgcn",
-    "dcrnn",
-    "graphwavenet",
-    "agcrn",
-    "stid",
-    "staeformer",
-    "shiftguard",
-    "shiftguard_noreliability",
-    "shiftguard_staticgraph",
-    "shiftguard_adaptivegraph",
-    "shiftguard_norouter",
-    "shiftguard_noaugmentation",
-    "shiftguard_independentaugmentation",
-)
+MODELS = MODEL_CHOICES
 
 
 def main() -> None:
@@ -100,7 +86,7 @@ def main() -> None:
                     primary = destination / f"stress_rate_{rate:.1f}.json"
                     if args.force or not primary.exists():
                         subprocess.run(base_command, check=True)
-                    if model == "shiftguard" and not args.skip_calibration_ablations:
+                    if model == REFERENCE_MODEL and not args.skip_calibration_ablations:
                         for calibration, selection in (
                             ("group-static", "risk"),
                             ("global-prequential", "risk"),

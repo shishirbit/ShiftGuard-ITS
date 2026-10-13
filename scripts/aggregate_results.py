@@ -5,6 +5,13 @@ from pathlib import Path
 
 import pandas as pd
 
+from shiftguard.registry import (
+    LEGACY_ABLATIONS,
+    LEGACY_MODEL,
+    REFERENCE_ABLATIONS,
+    REFERENCE_MODEL,
+)
+
 MODEL_LABELS = {
     "agcrn": "AGCRN",
     "dcrnn": "DCRNN",
@@ -15,25 +22,42 @@ MODEL_LABELS = {
     "mlp": "MLP",
     "persistence": "Persistence",
     "ridge_ar": "Ridge AR",
-    "shiftguard": "ShiftGuard",
+    REFERENCE_MODEL: "ShiftGuard",
+    LEGACY_MODEL: "ShiftGuard + reliability weighting",
     "staeformer": "STAEformer",
     "stgcn": "STGCN",
     "stid": "STID",
-    "shiftguard_noreliability": "No reliability conditioning",
     "shiftguard_staticgraph": "Static graph only",
     "shiftguard_adaptivegraph": "Adaptive graph only",
     "shiftguard_norouter": "No regime router",
     "shiftguard_noaugmentation": "No outage augmentation",
     "shiftguard_independentaugmentation": "Independent masking only",
 }
+OUTAGE_AUGMENTED_SUFFIX = "_outageaug"
+for _name in ("mlp", "gru", "dcrnn", "graphwavenet", "agcrn", "stid", "staeformer"):
+    MODEL_LABELS[f"{_name}{OUTAGE_AUGMENTED_SUFFIX}"] = f"{MODEL_LABELS[_name]} + outage aug."
+    MODEL_LABELS[f"{_name}{OUTAGE_AUGMENTED_SUFFIX}_laplace"] = (
+        f"{MODEL_LABELS[_name]} + outage aug. + Laplace"
+    )
 
-ABLATION_MODELS = {
-    "shiftguard_noreliability",
-    "shiftguard_staticgraph",
-    "shiftguard_adaptivegraph",
-    "shiftguard_norouter",
-    "shiftguard_noaugmentation",
-    "shiftguard_independentaugmentation",
+for _flag, _label in (
+    ("staticgraph", "Static graph only"),
+    ("adaptivegraph", "Adaptive graph only"),
+    ("norouter", "No regime router"),
+    ("noaugmentation", "No outage augmentation"),
+    ("independentaugmentation", "Independent masking only"),
+):
+    MODEL_LABELS[f"{REFERENCE_MODEL}_{_flag}"] = _label
+# Every ShiftGuard variant except the reference is an ablation.
+ABLATION_MODELS = (set(REFERENCE_ABLATIONS) | set(LEGACY_ABLATIONS)) - {REFERENCE_MODEL}
+LEGACY_LABELS = {
+    LEGACY_MODEL: "Legacy ShiftGuard (reference + reliability weighting)",
+    "shiftguard_noreliability": "No reliability weighting (= reference)",
+    "shiftguard_staticgraph": "Static graph only",
+    "shiftguard_adaptivegraph": "Adaptive graph only",
+    "shiftguard_norouter": "No regime router",
+    "shiftguard_noaugmentation": "No outage augmentation",
+    "shiftguard_independentaugmentation": "Independent masking only",
 }
 
 
@@ -108,7 +132,7 @@ def aggregate_stress(destination: Path, paper: Path) -> None:
     summary.to_csv(destination / "stress_summary.csv", index=False)
     primary_models = {
         "persistence", "linear", "mlp", "gru", "stgcn", "dcrnn",
-        "graphwavenet", "agcrn", "stid", "staeformer", "shiftguard",
+        "graphwavenet", "agcrn", "stid", "staeformer", REFERENCE_MODEL,
     }
     main_source = summary[
         (summary["rate"] == 0.3)
@@ -160,22 +184,31 @@ def aggregate_stress(destination: Path, paper: Path) -> None:
         & (summary["calibration"] == "group-prequential")
         & (summary["selection"] == "risk")
         & (summary["family"] != "clean")
-        & summary["model"].isin({"shiftguard", *ABLATION_MODELS})
     ]
-    ablation = (
-        ablation_source.groupby(["dataset", "model"])
-        .agg(mae=("mae", "mean"), aurc=("aurc", "mean"), retained=("retained", "mean"))
-        .reset_index()
-        .rename(columns={"dataset": "Dataset", "model": "Variant", "mae": "MAE", "aurc": "AURC", "retained": "Retained"})
-    )
-    ablation["Variant"] = ablation["Variant"].replace(MODEL_LABELS)
-    ablation_latex = ablation.to_latex(index=False, float_format="%.3f", escape=True)
-    (destination / "ablation_main.tex").write_text(ablation_latex, encoding="utf-8")
-    if paper.is_dir():
-        (paper / "generated_ablation.tex").write_text(ablation_latex, encoding="utf-8")
+    for name, members, labels in (
+        ("ablation", {REFERENCE_MODEL, *REFERENCE_ABLATIONS}, {
+            **MODEL_LABELS, LEGACY_MODEL: "+ reliability weighting (legacy model)"}),
+        ("ablation_legacy", {LEGACY_MODEL, *LEGACY_ABLATIONS}, LEGACY_LABELS),
+    ):
+        selected = ablation_source[ablation_source["model"].isin(members)]
+        if selected.empty:
+            continue
+        ablation = (
+            selected.groupby(["dataset", "model"])
+            .agg(mae=("mae", "mean"), aurc=("aurc", "mean"),
+                 retained=("retained", "mean"), seeds=("seeds", "min"))
+            .reset_index()
+            .rename(columns={"dataset": "Dataset", "model": "Variant", "mae": "MAE",
+                             "aurc": "AURC", "retained": "Retained", "seeds": "Seeds"})
+        )
+        ablation["Variant"] = ablation["Variant"].replace(labels)
+        ablation_latex = ablation.to_latex(index=False, float_format="%.3f", escape=True)
+        (destination / f"{name}_main.tex").write_text(ablation_latex, encoding="utf-8")
+        if paper.is_dir():
+            (paper / f"generated_{name}.tex").write_text(ablation_latex, encoding="utf-8")
 
     calibration_source = summary[
-        (summary["model"] == "shiftguard")
+        (summary["model"] == REFERENCE_MODEL)
         & (summary["rate"] == 0.3)
         & (summary["family"] != "clean")
     ]
@@ -191,12 +224,152 @@ def aggregate_stress(destination: Path, paper: Path) -> None:
         (paper / "generated_calibration.tex").write_text(calibration_latex, encoding="utf-8")
 
 
+def aggregate_fair_comparison(destination: Path, paper: Path) -> None:
+    """Compare each baseline with and without the outage-augmentation recipe.
+
+    Only baselines that have an outage-augmented counterpart are reported, so
+    the table isolates the architecture from the training-time masking.
+    """
+
+    summary_path = destination / "stress_summary.csv"
+    if not summary_path.exists():
+        return
+    summary = pd.read_csv(summary_path)
+    variants = {
+        model for model in summary["model"].unique() if OUTAGE_AUGMENTED_SUFFIX in model
+    }
+    if not variants:
+        return
+    bases = {model.split(OUTAGE_AUGMENTED_SUFFIX)[0] for model in variants}
+    models = {REFERENCE_MODEL, *bases, *variants}
+    selected = summary[
+        (summary["rate"] == 0.3)
+        & (summary["calibration"] == "group-prequential")
+        & (summary["selection"] == "risk")
+        & summary["model"].isin(models)
+    ]
+    stressed = (
+        selected[selected["family"] != "clean"]
+        .groupby(["dataset", "model"])
+        .agg(
+            stress_mae=("mae", "mean"), aurc=("aurc", "mean"),
+            retained=("retained", "mean"), failure_rate=("failure_rate", "mean"),
+            seeds=("seeds", "min"),
+        )
+    )
+    clean = (
+        selected[selected["family"] == "clean"]
+        .groupby(["dataset", "model"])
+        .agg(clean_mae=("mae", "mean"))
+    )
+    fair = clean.join(stressed, how="right").reset_index()
+    fair["augmented"] = fair["model"].str.contains(OUTAGE_AUGMENTED_SUFFIX) | (
+        fair["model"] == REFERENCE_MODEL
+    )
+    fair = fair.sort_values(["dataset", "stress_mae"])
+    fair.to_csv(destination / "fair_comparison.csv", index=False)
+    display = fair[
+        ["dataset", "model", "clean_mae", "stress_mae", "aurc", "retained",
+         "failure_rate", "seeds"]
+    ].rename(
+        columns={
+            "dataset": "Dataset", "model": "Model", "clean_mae": "Clean MAE",
+            "stress_mae": "Stress MAE", "aurc": "AURC", "retained": "Retained",
+            "failure_rate": "Failure rate", "seeds": "Seeds",
+        }
+    )
+    display["Model"] = display["Model"].replace(MODEL_LABELS)
+    latex = display.to_latex(index=False, float_format="%.3f", escape=True, na_rep="--")
+    (destination / "fair_comparison.tex").write_text(latex, encoding="utf-8")
+    if paper.is_dir():
+        (paper / "generated_fair_comparison.tex").write_text(latex, encoding="utf-8")
+
+
+NATURAL_STRATA = {
+    "complete": "Complete inputs",
+    "sensor_outage_low": "Dead sensors, <=5% missing",
+    "sensor_outage_high": "Dead sensors, >5% missing",
+    "network_wide": "Network-wide dropout",
+}
+
+
+def aggregate_natural_missingness(destination: Path, paper: Path) -> None:
+    """Metrics stratified by the dataset's own missingness (no synthetic masks)."""
+
+    rows: list[dict[str, object]] = []
+    for path in Path("artifacts").glob("*/*/seed_*/natural_missingness.json"):
+        dataset, model, seed_dir = path.parts[-4], path.parts[-3], path.parts[-2]
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        for stratum, result in payload["results"].items():
+            rows.append(
+                {"dataset": dataset, "model": model,
+                 "seed": int(seed_dir.removeprefix("seed_")), "stratum": stratum, **result}
+            )
+    if not rows:
+        return
+    frame = pd.DataFrame(rows)
+    frame.to_csv(destination / "natural_missingness_all_runs.csv", index=False)
+    summary = (
+        frame.groupby(["dataset", "model", "stratum"])
+        .agg(
+            origins=("origins", "first"), mae=("mae", "mean"), mae_sd=("mae", "std"),
+            dead_sensor_mae=("dead_sensor_mae", "mean"), coverage=("coverage", "mean"),
+            retained=("retained", "mean"), failure_rate=("failure_rate_5mph", "mean"),
+            seeds=("seed", "nunique"),
+        )
+        .reset_index()
+    )
+    summary.to_csv(destination / "natural_missingness_summary.csv", index=False)
+    shown = {
+        REFERENCE_MODEL, f"{REFERENCE_MODEL}_noaugmentation", LEGACY_MODEL,
+        "shiftguard_noaugmentation", "staeformer", "stid", "dcrnn",
+        "graphwavenet",
+        "staeformer_outageaug", "staeformer_outageaug_laplace",
+    }
+    table = summary[
+        summary["model"].isin(shown)
+        & summary["stratum"].isin(NATURAL_STRATA)
+        & (summary["seeds"] >= 5)
+    ].copy()
+    if table.empty:
+        return
+    table["stratum"] = pd.Categorical(table["stratum"], list(NATURAL_STRATA), ordered=True)
+    table = table.sort_values(["dataset", "stratum", "mae"])
+    table["stratum"] = table["stratum"].astype(str).replace(NATURAL_STRATA)
+    table["model"] = table["model"].replace(
+        {
+            **MODEL_LABELS,
+            f"{REFERENCE_MODEL}_noaugmentation": "ShiftGuard w/o outage aug.",
+            "shiftguard_noaugmentation": "Legacy ShiftGuard w/o outage aug.",
+        }
+    )
+    display = table[
+        ["dataset", "stratum", "origins", "model", "mae", "dead_sensor_mae",
+         "coverage", "retained", "failure_rate"]
+    ].rename(
+        columns={
+            "dataset": "Dataset", "stratum": "Input missingness", "origins": "Origins",
+            "model": "Model", "mae": "MAE", "dead_sensor_mae": "Dead-sensor MAE",
+            "coverage": "PI coverage", "retained": "Retained", "failure_rate": "Failure rate",
+        }
+    )
+    latex = display.to_latex(index=False, float_format="%.3f", escape=True, na_rep="--")
+    (destination / "natural_missingness.tex").write_text(latex, encoding="utf-8")
+    if paper.is_dir():
+        (paper / "generated_natural_missingness.tex").write_text(latex, encoding="utf-8")
+
+
 def aggregate_efficiency(destination: Path, paper: Path) -> None:
     path = destination / "efficiency.csv"
     if not path.exists():
         return
     frame = pd.read_csv(path)
-    selected = frame[frame.model.isin({"graphwavenet", "dcrnn", "stid", "staeformer", "shiftguard"})]
+    # The reference model is benchmarked separately, on an idle GPU.
+    reference = destination / "efficiency_reference.csv"
+    if reference.exists():
+        extra = pd.read_csv(reference)
+        frame = pd.concat([frame[~frame.model.isin(extra.model.unique())], extra])
+    selected = frame[frame.model.isin({"graphwavenet", "dcrnn", "stid", "staeformer", REFERENCE_MODEL})]
     batch_one = selected[selected.batch_size == 1][
         ["dataset", "model", "parameters", "profiler_flops_per_sample", "median_latency_ms"]
     ]
@@ -257,6 +430,7 @@ def main() -> None:
         (summary["seeds"] >= 5) | summary["model"].isin(deterministic)
     ].copy()
     confirmed = confirmed[~confirmed["model"].isin(ABLATION_MODELS)]
+    confirmed = confirmed[~confirmed["model"].str.contains(OUTAGE_AUGMENTED_SUFFIX)]
     confirmed = confirmed.sort_values(["dataset", "mae_mean"])
     display = confirmed.rename(
         columns={
@@ -329,6 +503,8 @@ def main() -> None:
                 context_latex, encoding="utf-8"
             )
     aggregate_stress(destination, paper)
+    aggregate_fair_comparison(destination, paper)
+    aggregate_natural_missingness(destination, paper)
     aggregate_efficiency(destination, paper)
 
 

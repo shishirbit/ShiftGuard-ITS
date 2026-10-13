@@ -451,3 +451,24 @@ def laplace_loss(
     if observed is None:
         return loss.mean()
     return (loss * observed).sum() / observed.sum().clamp_min(1)
+
+
+class LaplaceHead(nn.Module):
+    """Give a direct multi-horizon baseline ShiftGuard's Laplace output.
+
+    The wrapped backbone is built with ``2 * horizon`` outputs; the first half is
+    the median and the second half a positive scale, so only the final output
+    layer grows and the backbone is shared.
+    """
+
+    def __init__(self, backbone: nn.Module, horizon: int = 12) -> None:
+        super().__init__()
+        self.backbone = backbone
+        self.horizon = horizon
+
+    def forward(
+        self, x: torch.Tensor, observed: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        output = self.backbone(x, observed)
+        median, raw_scale = output[:, : self.horizon], output[:, self.horizon :]
+        return median, F.softplus(raw_scale) + 1e-4
