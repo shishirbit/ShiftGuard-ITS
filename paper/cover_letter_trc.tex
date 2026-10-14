@@ -1,0 +1,108 @@
+\documentclass[10pt]{letter}
+\usepackage[a4paper,margin=22mm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xcolor}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{3pt}
+\pagestyle{empty}
+% Marks numbers that depend on running experiments; resolve before submission.
+\newcommand{\pending}[1]{\textcolor{red}{[PENDING: #1]}}
+% Seed-1 value from the fair-baseline run; replace with the five-seed result.
+\newcommand{\provisional}[1]{\textcolor{orange}{#1}}
+
+\signature{Shishir Singh Chauhan\\Manipal University Jaipur}
+\address{Shishir Singh Chauhan\\
+Manipal University Jaipur\\
+Dehmi Kalan, Jaipur-Ajmer Expressway\\
+Jaipur 303007, Rajasthan, India}
+
+\begin{document}
+
+\begin{letter}{The Editors\\
+Transportation Research Part C: Emerging Technologies}
+
+\opening{Dear Editors,}
+
+Please consider my manuscript, ``\textbf{ShiftGuard: Risk-Controlled
+Spatiotemporal Traffic Forecasting under Compound Regime Shifts and Sensor
+Outages},'' for publication as a full-length research article in
+\textit{Transportation Research Part C: Emerging Technologies}.
+
+Network-wide speed forecasts feed route guidance, ramp metering, and incident
+management, yet the benchmarks used to compare forecasting models assume that
+every detector reports and that traffic conditions resemble the training
+period. Traffic management centers face the opposite: loop detectors fail
+singly, along corridors, or across the whole network, often while traffic is
+moving between free flow and congestion. The manuscript asks a question that
+matters to such centers: when detectors fail and conditions shift, can a
+forecaster still be accurate, report honest uncertainty, and tell the operator
+when its forecast should not be used?
+
+The manuscript makes three contributions.
+\begin{enumerate}
+  \item A leakage-controlled stress protocol that crosses independent,
+  temporal-burst, contiguous-region, and high-centrality hub detector outages at
+  five severities with traffic regimes on METR-LA and PEMS-BAY. The same saved
+  outage masks are used for every model and seed, and the region and hub
+  outage types are never seen during training.
+  \item A model-agnostic reliability recipe: training on outage-shaped
+  observation masks, a Laplace median--scale output, rolling node--horizon
+  conformal calibration, and a forecast-level act/abstain rule whose threshold
+  is chosen and certified on disjoint past data.
+  \item Evidence that the recipe, not the architecture, carries the
+  robustness. Standard baselines from DCRNN to STAEformer are retrained with the
+  identical recipe and all become more robust; ablations of the compact
+  reference model, ShiftGuard, are reported in full, including the components
+  that did not help.
+\end{enumerate}
+
+Under synthetic outages averaged over four outage types and five severities,
+ShiftGuard lowers mean absolute error relative to the strongest locally
+reproduced transformer, STAEformer, from 3.74 to 3.27 mph on METR-LA and from
+2.49 to 1.87 mph on PEMS-BAY. At 30\% severity it releases 91\% and 98\% of
+forecasts with 7\% and 2\% failure, while using about 14 times fewer parameters
+than STAEformer. Most of that gap comes from the recipe: retrained with the
+same outage augmentation, every baseline's error under outages falls by
+\provisional{10--29\%}, and STAEformer becomes slightly more accurate than
+ShiftGuard. I report this openly because it is the point of the paper: the
+recipe transfers to existing forecasters, and ShiftGuard offers near-best
+accuracy at a fourteenth of the parameters and \provisional{5--9} times less
+training time. Because synthetic
+outages cannot establish field behavior, the manuscript also evaluates METR-LA's
+own missing detector data, without any synthetic mask. There, average accuracy
+is close to STAEformer's (3.00 versus 3.03 mph), but error on detectors that
+were silent for the whole input window is 10--22\% lower, 90\% prediction
+intervals keep their coverage in every missingness group, and 98.8\% of
+forecasts are released with 5.1\% failure, compared with 79.8\% and 6.2\% for
+STAEformer. The analysis also reports a failure mode openly: during
+network-wide detector dropouts, every model, including ShiftGuard, exceeds the
+10\% risk target, which motivates an explicit fallback in deployment.
+
+The claims are deliberately bounded. ShiftGuard is not a clean-data state of the
+art, the reference model was selected on validation data only, and the
+manuscript does not claim operational dependability established by field
+deployment. I believe this candor, together with the reusable protocol and
+recipe, suits the journal's interest in emerging technologies whose
+reliability can be assessed before deployment. The work should interest readers
+working on traffic forecasting, detector data quality, uncertainty
+quantification, and decision support in traffic management.
+
+The implementation, configurations, fixed seeds, outage generators, and
+table-generation scripts are available at
+\href{https://github.com/shishirbit/ShiftGuard-ITS}{github.com/shishirbit/ShiftGuard-ITS},
+and the manuscript gives official access information for both datasets.
+
+I confirm that this manuscript is original, has not been published previously,
+and is not under consideration by another journal. I am the sole author and
+have approved its submission. The study uses previously published benchmark
+data and involves no human participants, human samples, or animals. I have no
+competing interests to declare.
+
+Thank you for considering this work.
+
+\closing{Sincerely,}
+
+\end{letter}
+\end{document}

@@ -35,8 +35,10 @@ $ablations = @(
 & $python -u scripts\stress_statistical_tests.py *>> $logPath
 
 # 5. Latency needs an idle GPU: wait for the fair-baseline chain to finish.
-$fairChain = Get-Process -Id 14216 -ErrorAction SilentlyContinue
-if ($fairChain) { $fairChain.WaitForExit() }
+while (Get-CimInstance Win32_Process -Filter "Name = 'powershell.exe'" |
+        Where-Object { $_.CommandLine -like "*run_fair_baselines_background*" }) {
+    Start-Sleep -Seconds 300
+}
 & $python -u scripts\benchmark_efficiency.py --models $reference `
     --batch-sizes 1 8 --warmup 20 --repeats 100 `
     --output artifacts\summary\efficiency_reference.csv *>> $logPath
