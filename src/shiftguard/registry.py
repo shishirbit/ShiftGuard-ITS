@@ -23,6 +23,7 @@ REFERENCE_ABLATIONS = (
             "norouter",
             "noaugmentation",
             "independentaugmentation",
+            "nomaskinput",
         )
     ),
 )
@@ -42,6 +43,7 @@ SHIFTGUARD_FLAGS = (
     "norouter",
     "noaugmentation",
     "independentaugmentation",
+    "nomaskinput",
 )
 
 

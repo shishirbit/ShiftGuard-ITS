@@ -123,6 +123,7 @@ def build_model(name: str, nodes: int, adjacency: torch.Tensor) -> nn.Module:
             use_reliability="noreliability" not in flags,
             use_adaptive_adjacency="staticgraph" not in flags,
             use_static_adjacency="adaptivegraph" not in flags,
+            use_mask_input="nomaskinput" not in flags,
             **options,
         )
     raise ValueError(name)

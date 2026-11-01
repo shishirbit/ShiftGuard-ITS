@@ -345,12 +345,14 @@ class ShiftGuard(nn.Module):
         use_reliability: bool = True,
         use_static_adjacency: bool = True,
         use_adaptive_adjacency: bool = True,
+        use_mask_input: bool = True,
     ) -> None:
         super().__init__()
         if adjacency.shape != (nodes, nodes):
             raise ValueError("adjacency has wrong shape")
         self.nodes = nodes
         self.horizon = horizon
+        self.use_mask_input = use_mask_input
         self.use_reliability = use_reliability
         self.use_static_adjacency = use_static_adjacency
         self.use_adaptive_adjacency = use_adaptive_adjacency
@@ -401,6 +403,9 @@ class ShiftGuard(nn.Module):
             observed = torch.ones_like(x[..., :1])
         observed = observed * intrinsic
         values = x[..., :1] * observed
+        if not self.use_mask_input:
+            # Ablation: zero-filled speeds stay, but the model cannot see the mask.
+            observed = torch.ones_like(observed)
         reliability = observed.mean(dim=1).squeeze(-1).unsqueeze(-1)
         graph_reliability = reliability if self.use_reliability else torch.ones_like(reliability)
         encoded = torch.cat([values[..., 0], observed[..., 0]], dim=1)
