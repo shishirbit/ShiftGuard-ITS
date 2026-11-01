@@ -32,3 +32,12 @@ def test_gating_claims_exclude_the_exploratory_run():
     # Point-model contrasts and other datasets keep every seed.
     assert seeds["METR-LA", "mean_outage", "ref-staeformer|model"] == 2
     assert seeds["PEMS-BAY", "trace_x1", "gated-model"] == 2
+
+
+def test_always_release_recovers_origin_weighted_mae():
+    spec = importlib.util.spec_from_file_location("build_report", Path("scripts/build_deployment_report.py"))
+    report = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(report)
+    coverage, always, fallback = 0.8, 3.0, 4.0
+    item = {"retained": coverage, "policy_mae_random": coverage * always + (1 - coverage) * fallback}
+    assert abs(report.origin_always_release(item, fallback) - always) < 1e-12
