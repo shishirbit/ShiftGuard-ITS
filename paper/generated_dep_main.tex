@@ -1,0 +1,20 @@
+\begin{tabular}{llrrrrrrrr}
+\toprule
+Dataset & Model & Native MAE & Outage MAE & Blind MAE & PI cov. & Blind cov. & Retained & Failure & Seeds \\
+\midrule
+METR-LA & ShiftGuard & 3.004 & 3.225 & 4.279 & 0.897 & 0.878 & 97.3 & 8.2 & 5 \\
+METR-LA & STAEformer & 3.032 & 3.483 & 5.065 & 0.884 & 0.825 & 42.5 & 18.8 & 5 \\
+METR-LA & STID & 3.273 & 3.802 & 5.931 & 0.881 & 0.805 & 3.7 & 31.5 & 5 \\
+METR-LA & DCRNN & 3.247 & 4.047 & 6.764 & 0.875 & 0.778 & 4.0 & 18.8 & 5 \\
+METR-LA & Graph WaveNet & 3.285 & 4.125 & 6.674 & 0.878 & 0.795 & 3.4 & 22.2 & 5 \\
+METR-LA & AGCRN & 3.343 & 4.131 & 6.776 & 0.878 & 0.793 & 1.8 & 25.6 & 5 \\
+METR-LA & Historical profile (fallback) & 4.190 & 4.190 & 4.114 & -- & -- & -- & -- & 5 \\
+PEMS-BAY & ShiftGuard & 1.590 & 1.796 & 2.860 & 0.891 & 0.818 & 99.7 & 1.6 & 5 \\
+PEMS-BAY & STAEformer & 1.577 & 2.221 & 4.760 & 0.843 & 0.558 & 100.0 & 6.6 & 5 \\
+PEMS-BAY & STID & 1.664 & 2.297 & 4.871 & 0.844 & 0.558 & 100.0 & 6.5 & 5 \\
+PEMS-BAY & DCRNN & 1.683 & 2.485 & 5.293 & 0.841 & 0.545 & 100.0 & 8.6 & 5 \\
+PEMS-BAY & Graph WaveNet & 1.720 & 2.500 & 5.291 & 0.841 & 0.541 & 99.4 & 7.9 & 5 \\
+PEMS-BAY & AGCRN & 1.731 & 2.560 & 5.415 & 0.843 & 0.548 & 97.1 & 9.3 & 5 \\
+PEMS-BAY & Historical profile (fallback) & 2.906 & 2.906 & 2.801 & -- & -- & -- & -- & 5 \\
+\bottomrule
+\end{tabular}

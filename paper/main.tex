@@ -4,6 +4,7 @@
 \usepgfplotslibrary{groupplots}
 \usetikzlibrary{arrows.meta,positioning}
 \pgfplotsset{compat=1.18}
+\graphicspath{{figures/}}
 \usepackage{hyperref}
 \usepackage[nameinlink,capitalise]{cleveref}
 \hypersetup{hidelinks}
@@ -44,11 +45,20 @@ and abstention is scored against a historical-profile fallback. Scenarios replay
 real availability traces from the METR-LA training period and simulate sensor,
 correlated-cluster, and hub failures on METR-LA and PEMS-BAY. Applied through
 ShiftGuard, a compact mask-aware reference forecaster with 89k--100k parameters,
-\pending{deployment MAE, coverage, retention, and failure against STAEformer}.
-To separate recipe from architecture, five baselines are retrained with the same
-augmentation and Laplace output; \pending{transfer result, and whether a
-recipe-equipped baseline beats ShiftGuard}. \pending{Outcome of the four
-registered hypotheses, including any that failed.} An audit of our earlier
+averages 3.23 and 1.80 mph MAE across the five outage scenarios on the two
+datasets, against 3.48 and 2.22 mph for the strongest published baseline,
+STAEformer (paired 95\% intervals $[-0.303,-0.218]$ and $[-0.458,-0.383]$ mph).
+On replayed real traces the gain is much smaller and vanishes on METR-LA at one
+trace (3.222 versus 3.224 mph). With feasible calibration it releases 97\% and
+99.7\% of forecasts with 8.2\% and 1.6\% failure, against 43\% with 18.8\% and
+100\% with 6.6\% for STAEformer. Removing outage augmentation costs 0.22 and
+0.46 mph, the largest ablation effect. To separate recipe from architecture, five
+baselines are retrained with the same augmentation and Laplace output;
+\pending{final transfer result across five seeds}. Of four registered hypotheses,
+evidence gating lowered blind-sensor error, left fresh-sensor error unchanged,
+and improved blind-sensor coverage, but abstaining to a historical fallback did
+not lower MAE. When the risk certificate is limited to origins with non-overlapping
+targets, it certifies only 22\% of daily blocks on METR-LA. An audit of our earlier
 window-level stress protocol found defects, so those results are reported only
 as a labelled legacy comparison. On METR-LA's own missing data, average accuracy
 is close to STAEformer's, but ShiftGuard reduces error on silent sensors by
@@ -183,9 +193,13 @@ was not deployable: overlapping windows disagreed about sensor state, region and
 hub outages lasted the whole test block, and calibration read outcomes from
 failed sensors. We therefore report those results only as a legacy comparison
 and base our claims on a deployment-feasible protocol.
-\pending{Summarize deployment results: ShiftGuard versus STAEformer, how far the
-recipe lifts the baselines, whether a recipe-equipped baseline overtakes
-ShiftGuard, and the value of abstaining to the fallback.} ShiftGuard uses about
+Under that protocol, ShiftGuard averages 3.23 and 1.80 mph across five outage
+scenarios on METR-LA and PEMS-BAY, against 3.48 and 2.22 mph for STAEformer, and
+it releases far more forecasts on METR-LA at lower failure. The gain is concentrated
+in the synthetic scenarios: on replayed real traces it is 0.002--0.05 mph at
+one trace. \pending{Five-seed result: how far the recipe lifts the baselines, and
+whether a recipe-equipped baseline overtakes ShiftGuard.} Abstaining to a
+historical fallback controls failure but does not lower MAE. ShiftGuard uses about
 14 times fewer parameters than STAEformer. These results position the work as a
 transferable robustness and decision-reliability recipe with an efficient
 reference implementation, not as a universal clean-data state of the art or a
@@ -208,7 +222,8 @@ This work makes four contributions:
   \item We test whether the recipe or the architecture carries the robustness.
   Five baselines, from DCRNN to STAEformer, are retrained with the identical
   augmentation and with the identical probabilistic output, and are evaluated on
-  the same outage timelines. \pending{State the transfer result.} Ablations of
+  the same outage timelines, with results reported on seeds shared by each
+  comparison. \pending{State the five-seed transfer result.} Ablations of
   the reference model are reported in full, including negative results for
   reliability-weighted propagation and regime routing.
   \item We provide ShiftGuard, an efficient reference implementation of the
@@ -458,7 +473,7 @@ convert uncertainty into an origin-level act/abstain decision with explicit
 risk and retention metrics. Fourth, complexity can obscure the true cause of
 improvement unless simple baselines, efficiency, and negative ablations are
 reported. We consequently ask: (RQ1) Does structured-outage training improve
-point robustness across both benchmarks and all four outage geometries? (RQ2)
+point robustness across both benchmarks and all outage scenarios? (RQ2)
 Does prequential group calibration improve worst-group reliability under
 drift? (RQ3) Can origin-level selection reduce accepted-forecast failure while
 retaining useful coverage? (RQ4) Are the gains attributable to the training
@@ -1209,13 +1224,116 @@ registered outage and selective-prediction experiments.
 
 \subsection{Deployment-feasible results}
 \label{sec:deployment-results}
-\pending{Generate tables from scripts/aggregate\_deployment.py once all seeds
-finish. Report: (i) MAE, coverage, retention, and failure for each model and
-scenario with feasible calibration; (ii) the policy value of abstaining to the
-fallback against random and oracle abstention; (iii) the gap between the oracle
-and feasible arms; (iv) H1--H4, with failed hypotheses reported as failed, using
-the gating-confirmatory seeds only.}
+\input{generated_dep_status.tex}
+Table~\ref{tab:dep-main} compares ShiftGuard with the published baselines using
+feasible calibration, and Figure~\ref{fig:dep-scenarios} and
+Table~\ref{tab:dep-scenarios} separate the scenarios. Averaged over the five outage
+scenarios, ShiftGuard's MAE is lower than STAEformer's by 0.259 mph on METR-LA
+(crossed seed--day 95\% interval $[-0.303,-0.218]$) and 0.420 mph on PEMS-BAY
+($[-0.458,-0.383]$), and lower than every other published baseline by at least
+0.49 mph. The scenarios differ sharply. The gain comes mainly from the simulated
+sensor, region, and hub failures, whereas on replayed real traces at one offset it
+is 0.002 mph on METR-LA and 0.052 mph on PEMS-BAY. Without any added outage
+(native), the two models are within 0.03 mph. Evaluations that use only
+strong synthetic outages would therefore overstate the practical gain.
 
+\begin{table*}[t]
+  \centering
+  \caption{Deployment-feasible comparison, averaged over the five outage scenarios,
+  with feasible calibration. Blind MAE covers sensors with no report in the input
+  window. Retained and failure are percentages; failure is the share of released
+  forecast origins with mean error above 5 mph.}
+  \label{tab:dep-main}
+  \resizebox{\textwidth}{!}{\input{generated_dep_main.tex}}
+\end{table*}
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\textwidth]{dep_scenarios.pdf}
+  \caption{MAE by deployment scenario for ShiftGuard, STAEformer, and the
+  historical-profile fallback, on all five seeds. The advantage is large under
+  simulated failures and small on replayed real traces.}
+  \label{fig:dep-scenarios}
+\end{figure*}
+
+\begin{table*}[t]
+  \centering
+  \caption{ShiftGuard (SG) and STAEformer (STAE) by scenario with feasible
+  calibration. Unavail., Ret., and Fail. are percentages of added unavailable input
+  cells, released origins, and failures among released origins.}
+  \label{tab:dep-scenarios}
+  \resizebox{\textwidth}{!}{\input{generated_dep_scenarios.tex}}
+\end{table*}
+
+Silent sensors are the hardest case. The historical profile alone has lower
+blind-sensor error than any unblended model (4.11 and 2.80 mph, against 4.28 and
+2.86 mph for ShiftGuard and 5.07 and 4.76 mph for STAEformer), so a forecaster
+that has lost a sensor's history gains little over its calendar average. ShiftGuard's
+intervals also cover these cells better: 0.878 and 0.818, against 0.825 and 0.558
+for STAEformer.
+
+Figure~\ref{fig:dep-policy} shows the operational result. ShiftGuard releases 97.3\%
+and 99.7\% of forecasts with 8.2\% and 1.6\% failure. STAEformer releases 42.5\% with
+18.8\% failure on METR-LA and everything with 6.6\% failure on PEMS-BAY. The limit
+is not met everywhere: on METR-LA region outages ShiftGuard's failure is 13.1\%,
+and 33\% of scored days exceed the 10\% limit even though the average meets it.
+Table~\ref{tab:dep-arms} shows what realistic feedback costs. Moving from oracle
+to feasible feedback changes coverage little, which supports deployment without
+failed-sensor outcomes. Thinning the certificate to non-overlapping targets is
+far more consequential: on METR-LA it certifies only 22.3\% of daily blocks and
+retention falls from 97.3\% to 17.6\%, whereas on PEMS-BAY it certifies 92.1\% and
+retains 90.2\%. Much of the apparent certification on METR-LA therefore relies on
+overlapping, dependent origins and should not be read as a strong guarantee.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{dep_policy.pdf}
+  \caption{Forecasts released against failure among those released, with feasible
+  calibration, averaged over the five outage scenarios and five seeds.}
+  \label{fig:dep-policy}
+\end{figure}
+
+\begin{table}[t]
+  \centering
+  \caption{Effect of calibration feedback on ShiftGuard. Retained, failure, days
+  over limit, and certified blocks are percentages.}
+  \label{tab:dep-arms}
+  \resizebox{\columnwidth}{!}{\input{generated_dep_arms.tex}}
+\end{table}
+
+Table~\ref{tab:dep-hypotheses} reports the registered hypotheses on ShiftGuard using
+the gating-confirmatory seeds. H1--H3 are supported on both datasets: gating lowers
+blind-sensor MAE by 0.112 and 0.161 mph without raising fresh-sensor MAE by more than
+1\%, and shadow calibration moves blind coverage closer to 0.90
+(Figure~\ref{fig:dep-freshness}). The overall effect of gating is small, because blind
+cells are a minority, and on PEMS-BAY it slightly raises MAE in the sensor scenario
+(0.009 mph, $[0.002,0.019]$). \textbf{H4 fails.} Abstaining to the historical profile
+does not lower MAE relative to always releasing: the difference is $+0.004$ mph on
+PEMS-BAY in every seed, and $+0.010$ mph on METR-LA with mixed signs across seeds.
+Abstention controls the failure rate rather than average error. With a fallback this
+weak, even perfect selection at the same abstention rate would lower MAE by only 0.03
+and 0.004 mph on average.
+
+\begin{table*}[t]
+  \centering
+  \caption{Registered hypotheses for ShiftGuard over the five outage scenarios,
+  excluding the exploratory METR-LA seed~1. Seed range gives the smallest and largest
+  per-seed difference; for H3 values are absolute gaps to 0.90. Supported requires
+  every seed to agree (or, for H2, every seed within the 1\% limit).}
+  \label{tab:dep-hypotheses}
+  \resizebox{\textwidth}{!}{\input{generated_dep_hypotheses.tex}}
+\end{table*}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{dep_freshness.pdf}
+  \caption{ShiftGuard by data freshness: MAE before and after evidence gating (top) and
+  evidence-gated interval coverage against the 0.90 target (bottom), on
+  gating-confirmatory seeds.}
+  \label{fig:dep-freshness}
+\end{figure}
+
+\FloatBarrier
 \subsection{Legacy stress comparison}
 These results use the protocol of Section~\ref{sec:legacy-protocol}, whose defects
 make its interval and selection results optimistic. They are not the basis of
@@ -1322,18 +1440,73 @@ occur during training. Hub loss disrupts STAEformer's global spatial
 interaction more strongly, while ShiftGuard can fall back on its local residual
 path and training-time node outages.
 
+\FloatBarrier
 \subsection{Recipe versus architecture}
 \label{sec:fair-comparison}
 Each baseline is compared in three forms, as published, with outage augmentation,
 and with outage augmentation plus the Laplace output, against ShiftGuard on the
 timelines of Section~\ref{sec:deployment-protocol}.
-\pending{Table from deployment\_summary.csv. Report (i) how much MAE each baseline
-recovers from augmentation alone; (ii) ShiftGuard's margin over augmented
-STAEformer with crossed intervals; (iii) whether the Laplace variants reach
-ShiftGuard-like retention and failure. If a recipe-equipped baseline beats
-ShiftGuard, state that the recipe, not the reference model, is the contribution,
-and lead with the best recipe-equipped backbone.}
+Table~\ref{tab:dep-recipe} and Figure~\ref{fig:dep-recipe} use only seeds shared by
+every form of a baseline and ShiftGuard. \pending{Most of these comparisons have only
+one seed so far. Rewrite this paragraph from the five-seed table, and decide the
+paper's main claim.} On the seeds finished so far, outage augmentation lowers MAE
+for every baseline on both datasets. With STID, the only baseline with enough seeds
+for a firm reading, the reduction is 0.27 mph on METR-LA and 0.32 mph on PEMS-BAY.
+The Laplace output gives up some of that accuracy on most baselines but raises
+METR-LA retention from 2--66\% to 81--97\% at failure near or below the 10\% limit. On one
+seed, recipe-equipped STAEformer is more accurate than ShiftGuard on METR-LA (by 0.12
+mph with augmentation alone) and is level with it on PEMS-BAY.
+\begin{table*}[t]
+  \centering
+  \caption{Recipe versus architecture, averaged over the five outage scenarios on
+  seeds shared within each baseline. ``vs SG'' is MAE minus ShiftGuard's on those
+  seeds; negative favors the baseline. Retained and failure are percentages.}
+  \label{tab:dep-recipe}
+  \resizebox{\textwidth}{!}{\input{generated_dep_recipe.tex}}
+\end{table*}
 
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\textwidth]{dep_recipe.pdf}
+  \caption{MAE relative to ShiftGuard for each baseline as published and with the
+  recipe, on the seeds in Table~\ref{tab:dep-recipe}.}
+  \label{fig:dep-recipe}
+\end{figure*}
+
+\subsection{Ablation of the reference model}
+\label{sec:dep-ablation}
+Table~\ref{tab:dep-ablation} and Figure~\ref{fig:dep-ablation} remove one component
+of ShiftGuard at a time under the deployment scenarios, comparing each variant with
+ShiftGuard on shared seeds. \pending{Rerun once the remaining ablation seeds finish:
+two PEMS-BAY variants are not yet scored.} Outage augmentation is the dominant
+component: removing it raises MAE by 0.217 and 0.460 mph, and increases blind-sensor
+error by 0.75 and 1.91 mph. Independent masking recovers only part of that on METR-LA
+(+0.121 mph). Restoring reliability weighting worsens MAE by 0.13 and 0.04 mph,
+with intervals excluding zero, which is consistent with the validation-based
+selection. The regime router has no detectable effect (0.005 mph on
+both datasets, intervals include zero), so it could be removed. Using only the static
+graph costs 0.04--0.08 mph, whereas using only the adaptive graph is
+indistinguishable from the reference on METR-LA. The mask input matters little on
+METR-LA (+0.021 mph), although one PEMS-BAY seed suggests more (+0.091 mph). These results support simplifying the model further and
+locating its robustness in the training distribution rather than in its modules.
+\begin{table}[t]
+  \centering
+  \caption{Ablations of ShiftGuard over the five outage scenarios with feasible
+  calibration. Delta MAE compares with ShiftGuard on shared seeds. Retained and
+  failure are percentages.}
+  \label{tab:dep-ablation}
+  \resizebox{\columnwidth}{!}{\input{generated_dep_ablation.tex}}
+\end{table}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{dep_ablation.pdf}
+  \caption{Change in outage MAE when one component of ShiftGuard is changed; positive
+  values mean the change hurts.}
+  \label{fig:dep-ablation}
+\end{figure}
+
+\FloatBarrier
 \subsection{Natural sensor missingness}
 \label{sec:natural-missingness}
 Synthetic masks cannot by themselves show that the protocol reflects field
@@ -1359,12 +1532,10 @@ the input window but whose target was observed, ShiftGuard's error is 5.18 and
 5.56 mph in the two partial-outage strata, compared with 5.78 and 7.08 mph for
 STAEformer and 6.67--10.22 mph for the graph and identity baselines. The legacy
 model with reliability weighting is worse on these cells (5.44 and 6.10 mph),
-consistent with the validation-based model selection. For the legacy model,
-training without outage augmentation raised these errors further to 5.65 and
-6.30 mph, so augmentation accounts for part, but not all, of the gap; the rest
-is associated with supplying the observation mask as an input.
-\pending{Replace the legacy no-augmentation comparison with the reference
-model's no-augmentation ablation once trained.}
+consistent with the validation-based model selection. Pooling all native silent
+cells, ablations locate the source of the advantage: ShiftGuard's error of 4.89 mph
+rises to 5.18 mph without outage augmentation, above STAEformer's 5.09 mph, whereas
+removing the mask input leaves it unchanged (4.88 mph on four seeds).
 
 ShiftGuard's 90\% intervals keep coverage between 0.889 and 0.900 in every
 stratum, whereas STAEformer and the graph baselines fall to 0.874--0.878 when
@@ -1378,8 +1549,6 @@ Such dropouts form 13\% of test origins, so the pooled prequential threshold is
 dominated by ordinary conditions. In deployment, the controller should
 therefore be paired with an explicit fallback when most of the network is
 silent; we report this as an open failure mode rather than a solved case.
-\pending{Add the outage-augmented baselines to this paragraph once their five
-seeds are complete.}
 \begin{table}[t]
   \centering
   \caption{METR-LA test origins grouped by their own input missingness, with
@@ -1446,8 +1615,8 @@ with 1.9\% failure and 0.898 coverage. The value of rolling adaptation is
 therefore strongest on the dataset with more native missingness and transition
 activity.
 
-\pending{Summarize the reference model's ablations under the deployment
-scenarios, including the no-mask-input ablation.} In the legacy model (Table~\ref{tab:ablation-legacy}),
+Ablations of the reference model appear in Section~\ref{sec:dep-ablation}. In the
+legacy model (Table~\ref{tab:ablation-legacy}),
 removing structured augmentation increased MAE by 0.306 mph on METR-LA and 0.703
 mph on PEMS-BAY, independent masking alone lost 0.098 and 0.220 mph, removing
 reliability weighting improved MAE by 0.143 and 0.067 mph, and removing the
@@ -1517,88 +1686,66 @@ the local benchmark, so ShiftGuard is not an absolute efficiency SOTA. Its
 claim is instead a favorable joint operating point: substantially lower outage
 error than those compact baselines while using far fewer resources.
 
+\FloatBarrier
 \section{Discussion}
 \subsection{Answers to the research questions}
-\pending{Rewrite these answers from Section~\ref{sec:deployment-results}. The
-figures below come from the legacy stress protocol, and any that survive must be
-labelled as such.}
+\textbf{RQ1: point robustness.} Structured-outage training improves point robustness
+on both datasets: removing it raises mean outage MAE by 0.217 and 0.460 mph, and
+ShiftGuard beats every published baseline by a clear margin
+(Table~\ref{tab:dep-main}). The result holds under region and hub outages, which
+are absent from training. Its practical size depends on the failure pattern,
+however: it is large under simulated failures and small on replayed real traces,
+especially on METR-LA. No result covers congested traffic, which neither test set
+contains.
 
-\textbf{RQ1: point robustness.} The results support the value of
-structured-outage training on both datasets. Averaged over 20 non-clean
-family--severity scenarios, ShiftGuard reduces MAE relative to the strongest
-local transformer by 0.476 mph on METR-LA and 0.617 mph on PEMS-BAY. The crossed
-seed--scenario bootstrap intervals exclude zero, and the separation grows with
-severity in Figure~\ref{fig:robustness-severity}. The effect is not confined to
-independent masking: Figure~\ref{fig:outage-family} shows an advantage in every
-registered outage family, including the region and hub geometries that are
-held out from training. Region failure remains the hardest condition in
-absolute terms, because a connected missing set removes both local history and
-the most useful neighbors.
+\textbf{RQ2: subgroup interval reliability.} Under feasible feedback, ShiftGuard's
+marginal coverage is 0.897 and 0.891, and blind-sensor coverage is 0.878 and 0.818
+against 0.825 and 0.558 for STAEformer. Evidence gating with shadow calibration
+moves blind coverage closer to 0.90 (H3). Coverage remains below target at blind
+PEMS-BAY sensors, so the problem is reduced, not solved.
 
-\textbf{RQ2: subgroup interval reliability.} At 30\% severity, ShiftGuard's
-90\% intervals achieve about 0.898 marginal coverage on both datasets. More
-importantly, worst node--horizon coverage is 0.830 versus 0.816 for
-STAEformer on METR-LA and 0.852 versus 0.834 on PEMS-BAY, while worst-regime
-coverage is 0.887 versus 0.809 and 0.876 versus 0.701. The PEMS-BAY
-difference is operationally meaningful: STAEformer's 0.701 worst-regime
-coverage means that a marginally acceptable interval can fail badly for a
-particular traffic state. Group-prequential calibration does not make every
-subgroup exactly 90\%; finite calibration samples, temporal dependence, and
-abrupt transitions prevent that interpretation. It does, however, reduce the
-disparity relative to the strongest comparator.
+\textbf{RQ3: selective risk.} The controller keeps average failure below the 10\% limit for
+ShiftGuard on both datasets at high retention, but with three qualifications. Failure
+exceeds the limit under METR-LA region outages (13.1\%) and on 33\% of METR-LA days.
+The certificate relies heavily on overlapping origins, certifying only 22\% of
+METR-LA blocks once they are thinned. And abstaining to the historical profile does
+not lower MAE (H4 fails), so its value lies in avoiding severe failures, not in
+improving average accuracy.
 
-\textbf{RQ3: selective risk.} The origin-level controller provides the clearest
-deployment advantage. The STAEformer figures below use a point-only model,
-whose origin-level interval widths carry little ranking information, so they
-bound the benefit of a learned scale rather than of the architecture;. On METR-LA, ShiftGuard retains 90.6\% of forecasts with a
-7.2\% empirical failure rate, compared with 5.5\% retention and 23.5\% failure
-for STAEformer under the same selection rule. On PEMS-BAY it retains 97.9\%
-with 1.9\% failure, versus 44.2\% and 8.5\%. Releasing every ShiftGuard forecast
-raises failure to 11.2\% and 2.7\%, respectively. The PEMS-BAY all-forecast rate
-is already below the 10\% target, yet risk control still removes a small harmful
-tail. On METR-LA, abstention materially changes whether the target is met. AURC
-improvements of 1.51 and 1.28 show that the interval-derived score ranks
-high-error origins better across the full retention continuum, not only at one
-threshold.
-
-\textbf{RQ4: recipe versus architecture.} Two lines of evidence narrow the
-explanation. In the legacy model, removing structured augmentation increased
-30\%-severity MAE by 0.306 mph on METR-LA and 0.703 mph on PEMS-BAY, whereas
-removing reliability-weighted propagation improved MAE by 0.143 and 0.067 mph;
-validation data then confirmed the simpler reference model.
-\pending{Reference-model ablations and the recipe-matched comparison under the
-deployment scenarios.} The robustness gain is
-therefore attributed to the training distribution, calibrated scale output,
-and decision layer, not to every architectural module. ShiftGuard remains a
-useful carrier of the recipe because it is computationally cheap: 89k/100k
-parameters and, \pending{re-measure; legacy values:} 37/42 MiB batch-eight
-peak allocated memory and 7.1 and 12.4 times the throughput of the local
-STAEformer on METR-LA and PEMS-BAY.
+\textbf{RQ4: recipe versus architecture.} Within ShiftGuard the answer is clear:
+augmentation dominates, and the router, reliability weighting, and mask input do
+not account for the gain (Section~\ref{sec:dep-ablation}). Across backbones,
+\pending{five-seed recipe-matched comparison; early results favor the recipe, with
+recipe-equipped STAEformer ahead of ShiftGuard on METR-LA on one seed}. ShiftGuard
+remains useful because it is cheap: 89k/100k parameters and,
+\pending{re-measure; legacy values:} 37/42 MiB batch-eight peak allocated memory and
+7.1 and 12.4 times the throughput of the local STAEformer on METR-LA and PEMS-BAY.
 
 \subsection{Why clean accuracy and deployment reliability disagree}
 The clean results illustrate why average benchmark rankings should not be
-treated as deployment rankings. STAEformer and ShiftGuard are indistinguishable
-on METR-LA at the tested resolution, while STAEformer is significantly better
-on clean PEMS-BAY. Under outage, the relationship reverses. STAEformer's
-adaptive embeddings and attention are highly effective when all node histories
-are present, but the model was not optimized to interpret an explicit failure
-mask or to reconstruct information from structured partial histories.
-ShiftGuard sacrifices a small amount of clean PEMS-BAY accuracy in exchange for
-a training distribution that covers missingness. This is a conventional
+treated as deployment rankings. ShiftGuard is slightly better on clean METR-LA,
+while STAEformer is slightly better on clean PEMS-BAY. Under outage, published
+STAEformer falls well behind, but the ablations indicate that this reflects its
+training distribution rather than any inability of attention to handle missing
+inputs. ShiftGuard gives up a small amount of clean PEMS-BAY accuracy in exchange
+for a training distribution that covers missingness. This is a conventional
 robustness trade-off rather than evidence that either model is universally
 superior.
 
 For an ITS operator, the preferred model depends on the cost function. If
 sensors are centrally managed, outages are negligible, and every prediction
 must be released, STAEformer may be preferred on PEMS-BAY. If communication
-loss, maintenance, or corridor failure is plausible and the controller can fall
-back to a safe policy, ShiftGuard offers a more useful risk--coverage profile.
+loss, maintenance, or corridor failure is plausible, a model trained on
+outage-shaped masks is preferable, and ShiftGuard offers a low-cost option with a
+useful risk--coverage profile.
 This distinction motivates reporting clean accuracy, stressed accuracy,
 calibration, selection, and resource cost as separate axes rather than
 collapsing them into one leaderboard.
 
 \subsection{Statistical interpretation}
-The hierarchical bootstrap resamples both seeds and outage scenarios, matching
+Deployment contrasts use a crossed bootstrap over seeds and days. Intervals from a
+single seed resample days only, and should be read as provisional. For the legacy
+stress results, the hierarchical bootstrap resamples both seeds and outage scenarios, matching
 the two principal replicated axes. Its confidence intervals support a stable
 average robustness effect. The seed-level Wilcoxon tests remain non-significant
 after Holm correction because five seeds permit only a coarse attainable
@@ -1617,7 +1764,9 @@ prequential order prevents future leakage, but neither operation proves
 independence. Accordingly, the paper calls the observed quantities empirical
 prequential coverage and failure. A stronger time-series certificate would
 require mixing assumptions, blockwise methods, martingale bounds, or online
-guarantees explicitly designed for dependent sequences.
+guarantees explicitly designed for dependent sequences. The thinned arm measures
+how much this matters: certification on METR-LA falls to 22\% of blocks once origins
+have non-overlapping targets.
 
 \subsection{Threats to validity and generalizability}
 Several limitations bound the claims. First, METR-LA and PEMS-BAY are freeway
@@ -1732,8 +1881,12 @@ available in deployment and abstention scored against a real fallback.
 
 The empirical conclusion is specific. ShiftGuard, the compact reference model,
 is not a clean-data state of the art: it is 0.03 mph better than STAEformer on
-clean METR-LA and 0.013 mph worse on clean PEMS-BAY. \pending{Deployment results
-and the recipe-transfer outcome; state ShiftGuard's role accordingly.} On METR-LA's
+clean METR-LA and 0.013 mph worse on clean PEMS-BAY. Under deployment-feasible
+outages it reduces MAE relative to STAEformer by 0.26 and 0.42 mph and maintains
+better blind-sensor coverage, but the gain is small on replayed real traces,
+abstaining to a historical fallback does not lower MAE, and the risk certificate
+weakens once origins are made non-overlapping. \pending{Five-seed recipe-transfer
+result; state ShiftGuard's role accordingly.} On METR-LA's
 naturally missing inputs the average gain largely disappears, but the advantage
 on silent sensors and the stability of interval coverage persist. Legacy ablations
 attribute the point gain to outage-structured augmentation rather than to

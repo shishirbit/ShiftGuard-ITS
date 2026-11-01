@@ -42,48 +42,38 @@ when its forecast should not be used?
 
 The manuscript makes three contributions.
 \begin{enumerate}
-  \item A leakage-controlled stress protocol that crosses independent,
-  temporal-burst, contiguous-region, and high-centrality hub detector outages at
-  five severities with traffic regimes on METR-LA and PEMS-BAY. The same saved
-  outage masks are used for every model and seed, and the region and hub
-  outage types are never seen during training.
+  \item A deployment-feasible evaluation in which detector outages persist
+  across forecast origins, outcomes from failed detectors are withheld from
+  calibration, and abstention is scored against a historical-profile fallback.
+  Scenarios replay real availability traces and simulate detector, corridor-like,
+  and hub failures on METR-LA and PEMS-BAY. An audit of our earlier stress protocol
+  is reported openly.
   \item A model-agnostic reliability recipe: training on outage-shaped
   observation masks, a Laplace median--scale output, rolling node--horizon
-  conformal calibration, and a forecast-level act/abstain rule whose threshold
-  is chosen and certified on disjoint past data.
-  \item Evidence that the recipe, not the architecture, carries the
-  robustness. Standard baselines from DCRNN to STAEformer are retrained with the
-  identical recipe and all become more robust; ablations of the compact
-  reference model, ShiftGuard, are reported in full, including the components
-  that did not help.
+  conformal calibration, a forecast-level act/abstain rule whose threshold is
+  chosen and certified on disjoint past data, and evidence gating for silent
+  detectors.
+  \item A test of whether the recipe or the architecture carries the robustness.
+  Standard baselines from DCRNN to STAEformer are retrained with the identical
+  recipe, and ablations of the compact reference model, ShiftGuard, are reported in
+  full, including the components that did not help.
 \end{enumerate}
 
-Under synthetic outages averaged over four outage types and five severities,
-ShiftGuard lowers mean absolute error relative to the strongest locally
-reproduced transformer, STAEformer, from 3.74 to 3.27 mph on METR-LA and from
-2.49 to 1.87 mph on PEMS-BAY. At 30\% severity it releases 91\% and 98\% of
-forecasts with 7\% and 2\% failure, while using about 14 times fewer parameters
-than STAEformer. Most of that gap comes from the recipe: retrained with the
-same outage augmentation, every baseline's error under outages falls by
-\provisional{10--29\%}, and STAEformer becomes slightly more accurate than
-ShiftGuard. I report this openly because it is the point of the paper: the
-recipe transfers to existing forecasters, and ShiftGuard offers near-best
-accuracy at a fourteenth of the parameters and \provisional{5--9} times less
-training time. Because synthetic
-outages cannot establish field behavior, the manuscript also evaluates METR-LA's
-own missing detector data, without any synthetic mask. There, average accuracy
-is close to STAEformer's (3.00 versus 3.03 mph), but error on detectors that
-were silent for the whole input window is 10--22\% lower, 90\% prediction
-intervals keep their coverage in every missingness group, and 98.8\% of
-forecasts are released with 5.1\% failure, compared with 79.8\% and 6.2\% for
-STAEformer. The analysis also reports a failure mode openly: during
-network-wide detector dropouts, every model, including ShiftGuard, exceeds the
-10\% risk target, which motivates an explicit fallback in deployment.
+Averaged over five outage scenarios, ShiftGuard's mean absolute error is 3.23 and
+1.80 mph on METR-LA and PEMS-BAY, against 3.48 and 2.22 mph for STAEformer, the
+strongest published baseline we reproduced, using about 14 times fewer parameters.
+It releases 97\% and 99.7\% of forecasts with 8.2\% and 1.6\% failure. When the
+baselines receive the same recipe, \pending{final five-seed transfer result}. The
+manuscript also reports results that limit these claims: the gain is small on
+replayed real outage traces, abstaining to a historical fallback did not lower error,
+the risk target is missed during METR-LA region outages and network-wide dropouts,
+and the risk certificate weakens substantially once forecast origins are made
+non-overlapping.
 
 The claims are deliberately bounded. ShiftGuard is not a clean-data state of the
-art, the reference model was selected on validation data only, and the
-manuscript does not claim operational dependability established by field
-deployment. I believe this candor, together with the reusable protocol and
+art, the reference model was selected on validation data only, and neither test
+set contains congested traffic. Replayed traces are retrospective, so the manuscript
+does not claim operational dependability established by field deployment. I believe this candor, together with the reusable protocol and
 recipe, suits the journal's interest in emerging technologies whose
 reliability can be assessed before deployment. The work should interest readers
 working on traffic forecasting, detector data quality, uncertainty
