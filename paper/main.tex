@@ -13,7 +13,6 @@
 % Every \pending must be resolved before submission.
 \newcommand{\pending}[1]{\textcolor{red}{[PENDING: #1]}}
 % Seed-1 value from the fair-baseline run; replace with the five-seed result.
-\newcommand{\provisional}[1]{\textcolor{orange}{#1}}
 
 \journal{Transportation Research Part C}
 
@@ -37,31 +36,25 @@ gated rather than by its spatial architecture. We formulate a model-agnostic
 reliability recipe that combines structured-outage training augmentation, a
 Laplace median--scale output, prequential node--horizon conformal calibration,
 and an origin-level act/abstain controller whose construction and
-certification samples are disjoint. A leakage-controlled stress protocol crosses
-independent, temporal-burst, contiguous-region, and high-centrality hub outages
-at five severities with traffic regimes on METR-LA and PEMS-BAY; region and hub
-geometries are held out from training. Applied through ShiftGuard, a compact
-mask-aware reference forecaster with 89k--100k parameters, the recipe lowers
-mean absolute error relative to the strongest locally reproduced transformer,
-STAEformer, from 3.74 to 3.27 mph on METR-LA and from 2.49 to 1.87 mph on
-PEMS-BAY across 640 confirmatory stress runs over five seeds, with crossed
-seed--scenario bootstrap intervals of $[-0.594,-0.366]$ and
-$[-0.745,-0.491]$ mph. At 30\% severity, the controller retains 91\% and 98\%
-of forecast origins while restricting accepted-origin failure to 7\% and 2\%.
-The gain belongs to the recipe rather than to the architecture. When five
-baselines are retrained with the identical outage augmentation, their stressed
-error falls by \provisional{10--23\%} on METR-LA and \provisional{21--29\%} on
-PEMS-BAY, and the augmented STAEformer becomes the most accurate model under
-stress (\provisional{3.13 and 1.76 mph}). ShiftGuard comes within
-\provisional{5\%} of that accuracy with 14 times fewer parameters and keeps
-higher worst-regime interval coverage at 30\% severity (\provisional{0.89 and
-0.88 versus 0.83 and 0.74}); \pending{confirm or withdraw the coverage gap
-against the outage-augmented Laplace baselines}. Ablations attribute point robustness to outage-structured augmentation rather
-than to reliability-weighted propagation or regime routing. On METR-LA's own
-missing data, average accuracy is close to STAEformer's, but ShiftGuard reduces
-error on silent sensors by 10--22\% and keeps interval coverage near 90\% in
-every missingness stratum; neither model meets the risk target during rare
-network-wide dropouts. ShiftGuard is not a clean-data state of the art: it is
+certification samples are disjoint, and adds evidence gating, which blends
+forecasts for silent sensors with a historical profile and calibrates them by
+data freshness. The evaluation is deployment-feasible: outages persist across
+forecast origins, outcomes from failed sensors are withheld from the calibrator,
+and abstention is scored against a historical-profile fallback. Scenarios replay
+real availability traces from the METR-LA training period and simulate sensor,
+correlated-cluster, and hub failures on METR-LA and PEMS-BAY. Applied through
+ShiftGuard, a compact mask-aware reference forecaster with 89k--100k parameters,
+\pending{deployment MAE, coverage, retention, and failure against STAEformer}.
+To separate recipe from architecture, five baselines are retrained with the same
+augmentation and Laplace output; \pending{transfer result, and whether a
+recipe-equipped baseline beats ShiftGuard}. \pending{Outcome of the four
+registered hypotheses, including any that failed.} An audit of our earlier
+window-level stress protocol found defects, so those results are reported only
+as a labelled legacy comparison. On METR-LA's own missing data, average accuracy
+is close to STAEformer's, but ShiftGuard reduces error on silent sensors by
+10--22\% and keeps interval coverage near 90\% in every missingness stratum;
+neither model meets the risk target during rare network-wide dropouts.
+ShiftGuard is not a clean-data state of the art: it is
 0.03 mph more accurate than STAEformer on clean METR-LA and 0.013 mph less
 accurate on PEMS-BAY.
 \end{abstract}
@@ -184,52 +177,45 @@ reported in full, including the modules that do not help.
 The experimental motivation is equally important. Clean accuracy alone would
 lead to an incorrect conclusion: on clean data ShiftGuard is only 0.03 mph more
 accurate than the local STAEformer on METR-LA and is 0.013 mph less accurate on
-PEMS-BAY. Under the
-registered compound-shift protocol, however, the ordering changes. Across four
-outage families, five severities, two datasets, and five seeds, ShiftGuard
-reduces mean MAE relative to STAEformer by 0.476 mph on METR-LA and 0.617 mph on
-PEMS-BAY. At 30\% severity it retains 91\% and 98\% of forecast origins while
-limiting empirical accepted-origin failure to 7\% and 2\%. It also uses about
-14 times fewer parameters than STAEformer. Most of this gap, however, is
-produced by the recipe and not by ShiftGuard's architecture. When the baselines
-receive the same outage augmentation, every one of them improves under stress,
-by \provisional{10--23\%} on METR-LA and \provisional{21--29\%} on PEMS-BAY,
-and the augmented STAEformer overtakes ShiftGuard on point accuracy by
-\provisional{0.15 and 0.08 mph}. ShiftGuard trains \provisional{5--9} times
-faster than the augmented STAEformer and keeps higher worst-regime interval
-coverage than every augmented point-output baseline; \pending{state whether
-the coverage advantage survives once the baselines also receive the Laplace
-output, which early STID results suggest it may not}. These
-results position the work as a transferable robustness and decision-reliability
-recipe with an efficient reference implementation, not as a universal
-clean-data state of the art or a better architecture.
+PEMS-BAY. The informative comparison is under outage. Our first evaluation used
+window-level stress masks and reported large gains, but an audit showed that it
+was not deployable: overlapping windows disagreed about sensor state, region and
+hub outages lasted the whole test block, and calibration read outcomes from
+failed sensors. We therefore report those results only as a legacy comparison
+and base our claims on a deployment-feasible protocol.
+\pending{Summarize deployment results: ShiftGuard versus STAEformer, how far the
+recipe lifts the baselines, whether a recipe-equipped baseline overtakes
+ShiftGuard, and the value of abstaining to the fallback.} ShiftGuard uses about
+14 times fewer parameters than STAEformer. These results position the work as a
+transferable robustness and decision-reliability recipe with an efficient
+reference implementation, not as a universal clean-data state of the art or a
+better architecture.
 
 This work makes four contributions:
 \begin{enumerate}
   \item We formulate traffic forecasting under compound temporal and
   measurement shift as a joint point, interval, and selective-decision task,
-  and release a leakage-controlled protocol crossing traffic regimes with four
-  graph-aware sensor-outage families and five severities.
+  and release a deployment-feasible protocol in which outages persist across
+  forecast origins, failed sensors' outcomes are withheld from calibration, and
+  abstention is scored against a real fallback. We also document the defects an
+  audit found in our earlier window-level stress protocol.
   \item We specify a model-agnostic reliability recipe: structured-outage
   augmentation, a Laplace median--scale output, prequential node--horizon
-  conformalization, and an origin-level risk controller whose construction and
-  certification samples are disjoint. Reliability is evaluated using marginal
-  and worst-group coverage, AURC, retention, and accepted-origin failure.
-  \item We show that the recipe, not the architecture, carries the
-  robustness. Five baselines, from DCRNN to STAEformer, are retrained with the
-  identical augmentation and with the identical probabilistic output, and are
-  evaluated on the same paired masks. Every baseline improves under stress, and
-  the strongest augmented baseline matches or exceeds the reference model on
-  point accuracy. Ablations of the reference model are reported in full,
-  including negative results for reliability-weighted propagation and regime
-  routing.
+  conformalization, an origin-level risk controller whose construction and
+  certification samples are disjoint, and evidence gating by data freshness with
+  shadow-blinded calibration. Reliability is evaluated using marginal and
+  worst-group coverage, AURC, retention, and accepted-origin failure.
+  \item We test whether the recipe or the architecture carries the robustness.
+  Five baselines, from DCRNN to STAEformer, are retrained with the identical
+  augmentation and with the identical probabilistic output, and are evaluated on
+  the same outage timelines. \pending{State the transfer result.} Ablations of
+  the reference model are reported in full, including negative results for
+  reliability-weighted propagation and regime routing.
   \item We provide ShiftGuard, an efficient reference implementation of the
   recipe, and a five-seed comparison against classical, recurrent,
   graph-convolutional, adaptive-graph, identity-based, and transformer
-  baselines with hierarchical paired inference and runtime, memory, and
-  parameter analyses. ShiftGuard reaches near-best stressed accuracy with about
-  14 times fewer parameters and \provisional{5--9} times less training time than
-  the strongest augmented comparator.
+  baselines with crossed seed--day intervals and runtime, memory, and parameter
+  analyses. ShiftGuard uses about 14 times fewer parameters than STAEformer.
 \end{enumerate}
 
 The remainder of the article is organized as follows. Section~2 synthesizes
@@ -903,6 +889,7 @@ Section~\ref{sec:fair-comparison}. The no-augmentation and independent-only
 variants test the mechanism within ShiftGuard.
 
 \subsection{Conformal risk control}
+\label{sec:evidence-gating-calibration-anchor}
 For a resolved calibration origin $u$, node--horizon nonconformity is
 \begin{equation}
  R_{u,h,i}=\frac{|Y_{u,h,i}-\hat Y_{u,h,i}|}{S_{u,h,i}}.
@@ -947,6 +934,26 @@ from past residuals; (4) compare mean width with the certified threshold; (5)
 release or withhold the full tensor; and (6) after its target resolves, append
 the new residual to the rolling calibration store. This ordered pipeline is the
 central leakage-control invariant of the system.
+
+\subsection{Evidence gating}
+\label{sec:evidence-gating}
+A forecast for a sensor that has stopped reporting cannot rest on that sensor's
+recent history. Evidence gating therefore assigns each sensor at each origin to a
+freshness level: fresh if it reported at the origin, recent if its last report
+was 1--5 steps earlier, stale if it was 6 or more steps earlier, and blind if it
+reported nothing in the input window. For each level and horizon, the output is
+$w\widehat{Y}+(1-w)F$, where $F$ is a time-of-week historical profile computed
+from training data only and $w\in\{0,0.05,\dots,1\}$ minimizes validation MAE
+under simulated validation outages drawn with dedicated seeds.
+
+Conformal quantiles are computed per freshness level and horizon in the same
+block-prequential manner as Section~\ref{sec:evidence-gating-calibration-anchor},
+pooling levels with fewer than 50 residuals. Silent sensors never produce
+outcomes in deployment, so their residuals cannot be observed directly.
+\emph{Shadow blinding} obtains them from working sensors: a random 15\% are
+hidden for the whole input window and a further 15\% for a random suffix of it,
+the model is rerun, and the resulting residuals are scored once those sensors'
+readings arrive. No test outcome from a failed sensor enters calibration.
 
 \section{Experimental design}
 \subsection{Datasets and leakage control}
@@ -1067,14 +1074,59 @@ accuracy table.
   \resizebox{\textwidth}{!}{\input{generated_reported_context.tex}}
 \end{table*}
 
-\subsection{Stress tests and metrics}
-We cross clean, independent, temporal-burst, contiguous-region, and high-degree
-hub outages at 10--50\% severity with free-flow, congested, stable intermediate,
-and transition regimes. Metrics include horizon-specific and average MAE, RMSE,
-MAPE; degradation and worst-regime MAE; coverage, width, Winkler score and
-worst-group coverage; AURC and selective MAE; parameters, FLOPs, latency, peak
-memory, and training time. Headline results use at least five seeds and paired
-bootstrap confidence intervals.
+\subsection{Deployment-feasible protocol}
+\label{sec:deployment-protocol}
+In this protocol, an outage is a property of a sensor at a timestamp, so
+consecutive forecast origins see the same failure and a failed sensor's future
+readings are unavailable. Six primary scenarios are evaluated. \emph{Native} adds
+no outage. \emph{Trace-x1} and \emph{trace-x2} replay real availability from the
+METR-LA training period at one or two superposed time offsets, preserving
+co-failures. \emph{Sensor-s30} simulates independent alternating-renewal failures
+of 30\% of cells, using empirical METR-LA down durations. \emph{Region-s30} and
+\emph{hub-s15} use episodes of at least one hour that remove a correlated cluster
+of 15\% of sensors, or 15\% of sensors drawn from the top 30\% by degree. Hub
+severity is 15\% because 30\% is unreachable under that pool, so it is not
+matched to the other families. PEMS-BAY has almost no native missingness, so its
+traces and durations are transplanted from METR-LA by sampling sensor columns,
+which preserves failure timing but not physical sensor identity. Models are
+compared on identical timelines for each seed.
+
+Three calibration arms differ in what the calibrator may read: \emph{oracle
+feedback} reads all outcomes and is an upper bound, \emph{feasible} reads only
+what working sensors reported, and \emph{feasible-thinned} also restricts the
+risk certificate to origins with non-overlapping targets. All scores use withheld
+truth, including at failed sensors. Abstention releases the training-only
+historical profile, and is compared with always releasing, with random abstention
+at the same rate, and with an oracle. Metrics include MAE overall and at blind
+sensors; coverage overall, at blind sensors, and by worst group; retention and
+failure among released forecasts; excess AURC; failure AUROC; and the share of
+days over the risk limit. Intervals use crossed seed--day bootstrapping.
+
+Evidence gating was motivated by a test-set pilot on METR-LA seed~1, which is
+therefore exploratory. The gating claims rest on PEMS-BAY and the other four
+METR-LA seeds, and nothing was tuned after the hypotheses were recorded:
+H1, gating lowers MAE at blind sensors relative to the unblended model;
+H2, gating does not raise fresh-sensor MAE by more than 1\%;
+H3, shadow calibration brings blind-cell coverage closer to 0.90 than
+node--horizon calibration with feasible feedback;
+H4, network-level abstention to the fallback lowers MAE relative to always
+releasing.
+
+\subsection{Legacy stress protocol and metrics}
+\label{sec:legacy-protocol}
+Our first evaluation crossed clean, independent, temporal-burst,
+contiguous-region, and high-degree hub outages at 10--50\% severity with
+free-flow, stable intermediate, and transition regimes. No origin in either test
+set meets the congested-regime definition, so no claim is made about congested
+traffic. A subsequent audit found three further defects: window-level masks can
+disagree across overlapping windows, region and hub outages last the entire test
+block, and calibration reads outcomes from failed sensors. Interval and selection
+results under this protocol are therefore optimistic and are reported only for
+continuity. Metrics include horizon-specific and average MAE, RMSE, MAPE;
+degradation and worst-regime MAE; coverage, width, Winkler score and worst-group
+coverage; AURC and selective MAE; parameters, FLOPs, latency, peak memory, and
+training time. Results use five seeds and paired bootstrap confidence
+intervals.
 
 The confirmatory environment is captured automatically, including Python and
 package versions, CUDA build, GPU, and driver. Runs use PyTorch 2.13.0 with CUDA
@@ -1155,8 +1207,19 @@ is therefore not presented as a new clean-data point-forecasting SOTA, and the
 proposed reliability contribution requires independent support from the
 registered outage and selective-prediction experiments.
 
-\subsection{Compound-shift robustness and calibration}
-Table~\ref{tab:stress-main} averages the registered 30\% non-clean outage
+\subsection{Deployment-feasible results}
+\label{sec:deployment-results}
+\pending{Generate tables from scripts/aggregate\_deployment.py once all seeds
+finish. Report: (i) MAE, coverage, retention, and failure for each model and
+scenario with feasible calibration; (ii) the policy value of abstaining to the
+fallback against random and oracle abstention; (iii) the gap between the oracle
+and feasible arms; (iv) H1--H4, with failed hypotheses reported as failed, using
+the gating-confirmatory seeds only.}
+
+\subsection{Legacy stress comparison}
+These results use the protocol of Section~\ref{sec:legacy-protocol}, whose defects
+make its interval and selection results optimistic. They are not the basis of
+our claims. Table~\ref{tab:stress-main} averages the registered 30\% non-clean outage
 families; all family-by-rate results remain available in machine-readable
 artifacts.
 \begin{table*}[t]
@@ -1261,26 +1324,15 @@ path and training-time node outages.
 
 \subsection{Recipe versus architecture}
 \label{sec:fair-comparison}
-Table~\ref{tab:fair-comparison} compares each baseline in three forms, as
-published, with outage augmentation, and with outage augmentation plus the
-Laplace output, against ShiftGuard on the same saved masks at 30\% severity.
-\pending{Report (i) how much stressed MAE each baseline recovers from
-augmentation alone; (ii) whether ShiftGuard's margin over augmented STAEformer
-remains significant under the crossed bootstrap; (iii) whether the Laplace
-variants reach ShiftGuard-like retention and failure under the same
-controller. If the augmented baselines match or beat ShiftGuard, state that the
-recipe, not the reference model, is the contribution, and lead with the best
-recipe-equipped backbone.}
-\begin{table}[t]
-  \centering
-  \caption{Recipe versus architecture at 30\% severity, averaged over non-clean
-  families and seeds. ``+ outage aug.'' adds ShiftGuard's training
-  augmentation; ``+ Laplace'' adds its median--scale output and loss.}
-  \label{tab:fair-comparison}
-  \IfFileExists{generated_fair_comparison.tex}{%
-    \resizebox{\columnwidth}{!}{\input{generated_fair_comparison.tex}}}{%
-    \pending{table generated by scripts/aggregate\_results.py}}
-\end{table}
+Each baseline is compared in three forms, as published, with outage augmentation,
+and with outage augmentation plus the Laplace output, against ShiftGuard on the
+timelines of Section~\ref{sec:deployment-protocol}.
+\pending{Table from deployment\_summary.csv. Report (i) how much MAE each baseline
+recovers from augmentation alone; (ii) ShiftGuard's margin over augmented
+STAEformer with crossed intervals; (iii) whether the Laplace variants reach
+ShiftGuard-like retention and failure. If a recipe-equipped baseline beats
+ShiftGuard, state that the recipe, not the reference model, is the contribution,
+and lead with the best recipe-equipped backbone.}
 
 \subsection{Natural sensor missingness}
 \label{sec:natural-missingness}
@@ -1378,8 +1430,9 @@ calibration controls.
   ShiftGuard with the registered controller; STAE-risk applies the same
   controller to STAEformer; SG-all releases every forecast. High retention is
   useful only when accepted-origin failure also remains low.
-  \pending{STAE-risk uses a point-only STAEformer whose intervals cannot vary
-  across origins; replace or add the outage-augmented Laplace STAEformer.}}
+  Legacy protocol. STAE-risk uses a point-only STAEformer, whose intervals carry
+  little origin-level information; Section~\ref{sec:fair-comparison} gives the
+  recipe-matched comparison.}
   \label{fig:selection-outcomes}
 \end{figure*}
 
@@ -1393,9 +1446,8 @@ with 1.9\% failure and 0.898 coverage. The value of rolling adaptation is
 therefore strongest on the dataset with more native missingness and transition
 activity.
 
-\pending{Summarize Table~\ref{tab:ablation}: effect of removing augmentation,
-independent-only masking, the router, and each graph support from the
-reference model.} In the legacy model (Table~\ref{tab:ablation-legacy}),
+\pending{Summarize the reference model's ablations under the deployment
+scenarios, including the no-mask-input ablation.} In the legacy model (Table~\ref{tab:ablation-legacy}),
 removing structured augmentation increased MAE by 0.306 mph on METR-LA and 0.703
 mph on PEMS-BAY, independent masking alone lost 0.098 and 0.220 mph, removing
 reliability weighting improved MAE by 0.143 and 0.067 mph, and removing the
@@ -1404,14 +1456,6 @@ effective component of the reference model and falsifies the stronger claim
 that every proposed mechanism is necessary. Together with
 Section~\ref{sec:fair-comparison}, this is why the paper's claims are made at
 the level of the recipe rather than the architecture.
-\begin{table}[t]
-  \centering
-  \caption{Ablations of the reference model at 30\% severity, averaged over
-  non-clean families. ``+ reliability weighting'' restores the legacy model.}
-  \label{tab:ablation}
-  \resizebox{0.86\columnwidth}{!}{\input{generated_ablation.tex}}
-\end{table}
-
 \begin{table}[t]
   \centering
   \caption{Ablations of the legacy ShiftGuard model (with reliability
@@ -1475,6 +1519,10 @@ error than those compact baselines while using far fewer resources.
 
 \section{Discussion}
 \subsection{Answers to the research questions}
+\pending{Rewrite these answers from Section~\ref{sec:deployment-results}. The
+figures below come from the legacy stress protocol, and any that survive must be
+labelled as such.}
+
 \textbf{RQ1: point robustness.} The results support the value of
 structured-outage training on both datasets. Averaged over 20 non-clean
 family--severity scenarios, ShiftGuard reduces MAE relative to the strongest
@@ -1486,8 +1534,6 @@ registered outage family, including the region and hub geometries that are
 held out from training. Region failure remains the hardest condition in
 absolute terms, because a connected missing set removes both local history and
 the most useful neighbors.
-\pending{Add how the augmented baselines behave on region and hub outages, which
-no model sees during training.}
 
 \textbf{RQ2: subgroup interval reliability.} At 30\% severity, ShiftGuard's
 90\% intervals achieve about 0.898 marginal coverage on both datasets. More
@@ -1504,8 +1550,7 @@ disparity relative to the strongest comparator.
 \textbf{RQ3: selective risk.} The origin-level controller provides the clearest
 deployment advantage. The STAEformer figures below use a point-only model,
 whose origin-level interval widths carry little ranking information, so they
-bound the benefit of a learned scale rather than of the architecture;
-\pending{compare with the outage-augmented Laplace STAEformer}. On METR-LA, ShiftGuard retains 90.6\% of forecasts with a
+bound the benefit of a learned scale rather than of the architecture;. On METR-LA, ShiftGuard retains 90.6\% of forecasts with a
 7.2\% empirical failure rate, compared with 5.5\% retention and 23.5\% failure
 for STAEformer under the same selection rule. On PEMS-BAY it retains 97.9\%
 with 1.9\% failure, versus 44.2\% and 8.5\%. Releasing every ShiftGuard forecast
@@ -1521,11 +1566,8 @@ explanation. In the legacy model, removing structured augmentation increased
 30\%-severity MAE by 0.306 mph on METR-LA and 0.703 mph on PEMS-BAY, whereas
 removing reliability-weighted propagation improved MAE by 0.143 and 0.067 mph;
 validation data then confirmed the simpler reference model.
-\pending{Reference-model ablation results.} Across backbones, the
-recipe-matched comparison is decisive: outage augmentation alone lowers
-stressed MAE for every baseline, by \provisional{10--23\%} on METR-LA and
-\provisional{21--29\%} on PEMS-BAY, and lifts the augmented STAEformer
-\provisional{0.15 and 0.08 mph} above ShiftGuard. The robustness gain is
+\pending{Reference-model ablations and the recipe-matched comparison under the
+deployment scenarios.} The robustness gain is
 therefore attributed to the training distribution, calibrated scale output,
 and decision layer, not to every architectural module. ShiftGuard remains a
 useful carrier of the recipe because it is computationally cheap: 89k/100k
@@ -1593,7 +1635,12 @@ generators are designed by the same authors, part of any robustness gain could
 reflect matched assumptions; holding out region and hub geometries mitigates
 but does not remove this risk. No live outage logs or field deployment are
 evaluated, so the results establish robustness under a controlled and
-reproducible protocol, not operational dependability.
+reproducible protocol, not operational dependability. Trace replay improves
+realism but remains retrospective: traces come from one network and are
+transplanted to PEMS-BAY without preserving physical sensor identity. The
+legacy stress results additionally carry the defects described in
+Section~\ref{sec:legacy-protocol}, and neither test set contains congested
+origins, so behavior under sustained network-wide congestion is untested.
 The natural-missingness analysis in Section~\ref{sec:natural-missingness}
 is a partial check on real failure patterns. It shows smaller average
 differences than the synthetic protocol, a consistent advantage on silent
@@ -1678,27 +1725,20 @@ sensor-availability shift, and argues that reliability under that shift is
 mainly a property of training, calibration, and gating. The proposed recipe
 combines structured-outage augmentation, a Laplace median--scale output,
 rolling node--horizon conformalization, and an origin-level act/abstain rule.
-The accompanying protocol evaluates independent, burst, contiguous-region, and
-hub failures at five severities on METR-LA and PEMS-BAY, with identical masks,
-five seeds, hierarchical paired inference, held-out failure geometries, and
-separate clean and stressed claims.
+Evidence gating extends it to silent sensors. The accompanying deployment-feasible
+protocol evaluates outage timelines that persist across origins, including
+replayed real availability traces, with calibration limited to information
+available in deployment and abstention scored against a real fallback.
 
 The empirical conclusion is specific. ShiftGuard, the compact reference model,
 is not a clean-data state of the art: it is 0.03 mph better than STAEformer on
-clean METR-LA and 0.013 mph worse on clean PEMS-BAY. Across 640 stress
-evaluations, it reduces ShiftGuard--STAEformer MAE by 0.476 and 0.617 mph,
-improves worst-regime
-coverage, lowers AURC, and retains more forecasts under the registered risk
-controller while being about 14 times smaller. On METR-LA's naturally
-missing inputs the average gain largely disappears, but the advantage on silent
-sensors and the stability of interval coverage persist. Ablation attributes the
-point gain to outage-structured augmentation rather than to reliability-weighted
-propagation or routing, which validation data led us to remove, and the
-recipe-matched comparison shows that the recipe transfers: every baseline
-becomes more robust when trained on outage-shaped masks, and the augmented
-STAEformer is the most accurate model under stress. ShiftGuard's role is
-therefore that of an efficient reference implementation, within
-\provisional{5\%} of that accuracy at a fourteenth of the parameters.
+clean METR-LA and 0.013 mph worse on clean PEMS-BAY. \pending{Deployment results
+and the recipe-transfer outcome; state ShiftGuard's role accordingly.} On METR-LA's
+naturally missing inputs the average gain largely disappears, but the advantage
+on silent sensors and the stability of interval coverage persist. Legacy ablations
+attribute the point gain to outage-structured augmentation rather than to
+reliability-weighted propagation or routing, which validation data led us to
+remove.
 
 The work does not claim a new architecture, unconditional coverage under
 temporal dependence, or operational dependability established by field
