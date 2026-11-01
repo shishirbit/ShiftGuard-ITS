@@ -13,6 +13,13 @@ SUMMARY = Path("artifacts/summary")
 OUTAGES = ("trace_x1", "trace_x2", "sensor_s30", "region_s30", "hub_s15")
 PRIMARY = ("native", *OUTAGES)
 RESAMPLES = 10000
+# Evidence gating was piloted on this run, so gating claims must not use it
+# (see the 2026-11-01 entry in docs/experiment_protocol.md).
+EXPLORATORY_FOR_GATING = {("METR-LA", 1)}
+
+
+def confirmatory_for_gating(dataset: str, seed: int) -> bool:
+    return (dataset, seed) not in EXPLORATORY_FOR_GATING
 
 
 def load_runs() -> dict[tuple[str, str, int], dict]:
@@ -86,7 +93,7 @@ def paired_intervals(runs: dict, frame: pd.DataFrame) -> pd.DataFrame:
     for dataset in sorted(frame.dataset.unique()):
         seeds = {key[2]: value for key, value in runs.items() if key[:2] == (dataset, reference)}
         for scenario in OUTAGES:
-            ready = [s for s, r in seeds.items() if scenario in r]
+            ready = [s for s, r in seeds.items() if scenario in r and confirmatory_for_gating(dataset, s)]
             if not ready:
                 continue
             gate = np.array([np.array(seeds[s][scenario]["evidence"]["daily_mae"]) - np.array(seeds[s][scenario]["daily_mae"]) for s in ready])
@@ -100,11 +107,14 @@ def paired_intervals(runs: dict, frame: pd.DataFrame) -> pd.DataFrame:
             if not shared:
                 continue
             for field, label in ((lambda r: r["daily_mae"], "model"), (lambda r: r["evidence"]["daily_mae"], "gated")):
+                members = [s for s in shared if label == "model" or confirmatory_for_gating(dataset, s)]
+                if not members:
+                    continue
                 matrix = np.mean([
-                    [np.array(field(seeds[s][sc])) - np.array(field(other[s][sc])) for s in shared]
+                    [np.array(field(seeds[s][sc])) - np.array(field(other[s][sc])) for s in members]
                     for sc in OUTAGES
                 ], axis=0)
-                rows.append({"dataset": dataset, "scenario": "mean_outage", "contrast": f"ref-{comparator}|{label}", "seeds": len(shared), **dict(zip(("mean", "low", "high"), crossed_bootstrap(matrix, rng)))})
+                rows.append({"dataset": dataset, "scenario": "mean_outage", "contrast": f"ref-{comparator}|{label}", "seeds": len(members), **dict(zip(("mean", "low", "high"), crossed_bootstrap(matrix, rng)))})
     return pd.DataFrame(rows)
 
 
@@ -116,6 +126,10 @@ def main() -> None:
     numeric = frame.drop(columns=["seed"]).groupby(["dataset", "model", "scenario"]).mean(numeric_only=True)
     numeric["seeds"] = frame.groupby(["dataset", "model", "scenario"]).seed.nunique()
     numeric.reset_index().to_csv(SUMMARY / "deployment_summary.csv", index=False)
+    confirmatory = frame[[confirmatory_for_gating(d, s) for d, s in zip(frame.dataset, frame.seed)]]
+    gating = confirmatory.drop(columns=["seed"]).groupby(["dataset", "model", "scenario"]).mean(numeric_only=True)
+    gating["seeds"] = confirmatory.groupby(["dataset", "model", "scenario"]).seed.nunique()
+    gating.reset_index().to_csv(SUMMARY / "deployment_summary_gating.csv", index=False)
     paired_intervals(runs, frame).to_csv(SUMMARY / "deployment_paired.csv", index=False)
     print(frame.groupby(["dataset", "model"]).agg(seeds=("seed", "nunique"), scenarios=("scenario", "count")).to_string())
 
