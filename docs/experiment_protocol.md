@@ -70,6 +70,30 @@ results without an explicit amendment.
 
 ## Amendment log
 
+- 2026-11-01: deployment-feasible evaluation added (`scripts/evaluate_deployment.py`).
+  Audit of the 2026-09 stress protocol found: window-level masks that disagree
+  across overlapping windows; region and hub outages lasting the entire test
+  block; calibration reading outcomes of failed sensors; no congested origin in
+  either test set; and a controller that is constant within a day for point
+  models. Earlier "registered" results stay reported as the legacy protocol.
+  Evidence gating (`src/shiftguard/evidence.py`) was motivated by a test-set
+  pilot on METR-LA seed 1 (scenarios native, trace_x1, region_s30). Its weights
+  and calibration prior are fit on validation data only and nothing is tuned
+  after this entry. METR-LA seed 1 is exploratory; PEMS-BAY and METR-LA seeds
+  12, 42, 123, 2026 are confirmatory for the gating claims. Hypotheses:
+  H1 gating lowers MAE at blind sensors relative to the unblended model;
+  H2 gating does not raise fresh-sensor MAE by more than 1%;
+  H3 shadow calibration brings blind-cell coverage closer to 0.90 than
+  node-horizon calibration with feasible feedback, without oracle outcomes;
+  H4 network-level abstention to a historical fallback lowers MAE relative to
+  always releasing. Failed hypotheses are reported as failed.
+  Later the same day, hub_s30 was replaced by hub_s15 before any hub result
+  existed: failures are limited to the top 30% of sensors by degree, so 30% of
+  cells is unreachable on METR-LA (62/207 sensors) and would mean every hub down
+  permanently on PEMS-BAY. At 15% the hubs are down about half the time. Hub
+  severity is therefore not matched to the other 30% families. The change was
+  motivated by the generator failing to terminate, not by test performance.
+
 - 2026-09-03: PEMS-BAY STAEformer exceeded practical memory capacity (about
   87 minutes for one epoch, 7.9 GB allocated device memory and under 1 GB free
   system RAM). Resume from the complete epoch-1 training state using microbatches

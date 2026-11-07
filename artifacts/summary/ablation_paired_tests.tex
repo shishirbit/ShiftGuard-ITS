@@ -2,29 +2,29 @@
 \toprule
 dataset & competitor & metric & proposed\_mean & competitor\_mean & difference & ci95\_low & ci95\_high & wilcoxon\_p & seeds & scenarios & holm\_p \\
 \midrule
-METR-LA & shiftguard\_noreliability & mae & 3.3987 & 3.2561 & 0.1426 & 0.0369 & 0.2605 & 0.0625 & 5 & 4 & 0.3750 \\
-METR-LA & shiftguard\_noreliability & aurc & 2.4001 & 2.3394 & 0.0607 & 0.0131 & 0.1129 & 0.0625 & 5 & 4 & 0.3750 \\
-METR-LA & shiftguard\_staticgraph & mae & 3.3987 & 3.4690 & -0.0703 & -0.2003 & 0.0036 & 0.0625 & 5 & 4 & 0.3750 \\
-METR-LA & shiftguard\_staticgraph & aurc & 2.4001 & 2.4484 & -0.0483 & -0.1365 & 0.0017 & 0.0625 & 5 & 4 & 0.3750 \\
-METR-LA & shiftguard\_adaptivegraph & mae & 3.3987 & 3.3194 & 0.0793 & 0.0461 & 0.1290 & 0.0625 & 5 & 4 & 0.3750 \\
-METR-LA & shiftguard\_adaptivegraph & aurc & 2.4001 & 2.3623 & 0.0378 & 0.0168 & 0.0654 & 0.0625 & 5 & 4 & 0.3750 \\
-METR-LA & shiftguard\_norouter & mae & 3.3987 & 3.3719 & 0.0268 & 0.0036 & 0.0482 & 0.1250 & 5 & 4 & 0.3750 \\
-METR-LA & shiftguard\_norouter & aurc & 2.4001 & 2.3918 & 0.0083 & -0.0099 & 0.0215 & 0.3125 & 5 & 4 & 0.3750 \\
-METR-LA & shiftguard\_noaugmentation & mae & 3.3987 & 3.7046 & -0.3059 & -0.4254 & -0.2151 & 0.0625 & 5 & 4 & 0.3750 \\
-METR-LA & shiftguard\_noaugmentation & aurc & 2.4001 & 2.6569 & -0.2568 & -0.3973 & -0.1232 & 0.0625 & 5 & 4 & 0.3750 \\
-METR-LA & shiftguard\_independentaugmentation & mae & 3.3987 & 3.4965 & -0.0978 & -0.2282 & 0.0169 & 0.0625 & 5 & 4 & 0.3750 \\
-METR-LA & shiftguard\_independentaugmentation & aurc & 2.4001 & 2.5079 & -0.1078 & -0.2232 & 0.0008 & 0.0625 & 5 & 4 & 0.3750 \\
-PEMS-BAY & shiftguard\_noreliability & mae & 1.9478 & 1.8806 & 0.0672 & 0.0259 & 0.1172 & 0.0625 & 5 & 4 & 0.3750 \\
-PEMS-BAY & shiftguard\_noreliability & aurc & 1.1297 & 1.0983 & 0.0313 & 0.0095 & 0.0630 & 0.0625 & 5 & 4 & 0.3750 \\
-PEMS-BAY & shiftguard\_staticgraph & mae & 1.9478 & 2.0561 & -0.1083 & -0.2328 & 0.0151 & 0.0625 & 5 & 4 & 0.3750 \\
-PEMS-BAY & shiftguard\_staticgraph & aurc & 1.1297 & 1.2381 & -0.1084 & -0.2682 & 0.0098 & 0.0625 & 5 & 4 & 0.3750 \\
-PEMS-BAY & shiftguard\_adaptivegraph & mae & 1.9478 & 1.8844 & 0.0634 & 0.0267 & 0.1128 & 0.0625 & 5 & 4 & 0.3750 \\
-PEMS-BAY & shiftguard\_adaptivegraph & aurc & 1.1297 & 1.1081 & 0.0216 & 0.0070 & 0.0398 & 0.0625 & 5 & 4 & 0.3750 \\
-PEMS-BAY & shiftguard\_norouter & mae & 1.9478 & 1.9270 & 0.0208 & -0.0027 & 0.0463 & 0.0625 & 5 & 4 & 0.3750 \\
-PEMS-BAY & shiftguard\_norouter & aurc & 1.1297 & 1.1147 & 0.0150 & 0.0044 & 0.0281 & 0.1250 & 5 & 4 & 0.3750 \\
-PEMS-BAY & shiftguard\_noaugmentation & mae & 1.9478 & 2.6512 & -0.7034 & -0.8327 & -0.5798 & 0.0625 & 5 & 4 & 0.3750 \\
-PEMS-BAY & shiftguard\_noaugmentation & aurc & 1.1297 & 1.7345 & -0.6049 & -0.7087 & -0.4866 & 0.0625 & 5 & 4 & 0.3750 \\
-PEMS-BAY & shiftguard\_independentaugmentation & mae & 1.9478 & 2.1680 & -0.2202 & -0.4360 & -0.0219 & 0.0625 & 5 & 4 & 0.3750 \\
-PEMS-BAY & shiftguard\_independentaugmentation & aurc & 1.1297 & 1.2043 & -0.0747 & -0.1500 & 0.0011 & 0.0625 & 5 & 4 & 0.3750 \\
+METR-LA & shiftguard & mae & 3.2561 & 3.3987 & -0.1426 & -0.2605 & -0.0369 & 0.0625 & 5 & 4 & 0.3750 \\
+METR-LA & shiftguard & aurc & 2.3394 & 2.4001 & -0.0607 & -0.1129 & -0.0131 & 0.0625 & 5 & 4 & 0.3750 \\
+METR-LA & shiftguard\_noreliability\_staticgraph & mae & NaN & NaN & NaN & NaN & NaN & NaN & 0 & 0 & 0.3750 \\
+METR-LA & shiftguard\_noreliability\_staticgraph & aurc & NaN & NaN & NaN & NaN & NaN & NaN & 0 & 0 & 0.3750 \\
+METR-LA & shiftguard\_noreliability\_adaptivegraph & mae & NaN & NaN & NaN & NaN & NaN & NaN & 0 & 0 & 0.3750 \\
+METR-LA & shiftguard\_noreliability\_adaptivegraph & aurc & NaN & NaN & NaN & NaN & NaN & NaN & 0 & 0 & 0.3750 \\
+METR-LA & shiftguard\_noreliability\_norouter & mae & NaN & NaN & NaN & NaN & NaN & NaN & 0 & 0 & 0.3750 \\
+METR-LA & shiftguard\_noreliability\_norouter & aurc & NaN & NaN & NaN & NaN & NaN & NaN & 0 & 0 & 0.3750 \\
+METR-LA & shiftguard\_noreliability\_noaugmentation & mae & NaN & NaN & NaN & NaN & NaN & NaN & 0 & 0 & 0.3750 \\
+METR-LA & shiftguard\_noreliability\_noaugmentation & aurc & NaN & NaN & NaN & NaN & NaN & NaN & 0 & 0 & 0.3750 \\
+METR-LA & shiftguard\_noreliability\_independentaugmentation & mae & NaN & NaN & NaN & NaN & NaN & NaN & 0 & 0 & 0.3750 \\
+METR-LA & shiftguard\_noreliability\_independentaugmentation & aurc & NaN & NaN & NaN & NaN & NaN & NaN & 0 & 0 & 0.3750 \\
+PEMS-BAY & shiftguard & mae & 1.8806 & 1.9478 & -0.0672 & -0.1162 & -0.0258 & 0.0625 & 5 & 4 & 0.3750 \\
+PEMS-BAY & shiftguard & aurc & 1.0983 & 1.1297 & -0.0313 & -0.0630 & -0.0093 & 0.0625 & 5 & 4 & 0.3750 \\
+PEMS-BAY & shiftguard\_noreliability\_staticgraph & mae & NaN & NaN & NaN & NaN & NaN & NaN & 0 & 0 & 0.3750 \\
+PEMS-BAY & shiftguard\_noreliability\_staticgraph & aurc & NaN & NaN & NaN & NaN & NaN & NaN & 0 & 0 & 0.3750 \\
+PEMS-BAY & shiftguard\_noreliability\_adaptivegraph & mae & NaN & NaN & NaN & NaN & NaN & NaN & 0 & 0 & 0.3750 \\
+PEMS-BAY & shiftguard\_noreliability\_adaptivegraph & aurc & NaN & NaN & NaN & NaN & NaN & NaN & 0 & 0 & 0.3750 \\
+PEMS-BAY & shiftguard\_noreliability\_norouter & mae & NaN & NaN & NaN & NaN & NaN & NaN & 0 & 0 & 0.3750 \\
+PEMS-BAY & shiftguard\_noreliability\_norouter & aurc & NaN & NaN & NaN & NaN & NaN & NaN & 0 & 0 & 0.3750 \\
+PEMS-BAY & shiftguard\_noreliability\_noaugmentation & mae & NaN & NaN & NaN & NaN & NaN & NaN & 0 & 0 & 0.3750 \\
+PEMS-BAY & shiftguard\_noreliability\_noaugmentation & aurc & NaN & NaN & NaN & NaN & NaN & NaN & 0 & 0 & 0.3750 \\
+PEMS-BAY & shiftguard\_noreliability\_independentaugmentation & mae & NaN & NaN & NaN & NaN & NaN & NaN & 0 & 0 & 0.3750 \\
+PEMS-BAY & shiftguard\_noreliability\_independentaugmentation & aurc & NaN & NaN & NaN & NaN & NaN & NaN & 0 & 0 & 0.3750 \\
 \bottomrule
 \end{tabular}

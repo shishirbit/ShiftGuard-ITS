@@ -1,0 +1,1045 @@
+{
+  "protocol_version": "origin-risk-v1",
+  "group_coverage_version": "node-horizon-regime-v1",
+  "calibration": "group-prequential",
+  "selection": "risk",
+  "risk_unit": "forecast_origin_mean_absolute_error",
+  "stress_rate": 0.1,
+  "results": {
+    "clean": {
+      "point": {
+        "average": {
+          "mae": 3.00513217627356,
+          "rmse": 6.119503995436819,
+          "mape": 8.438297959619906
+        },
+        "h3": {
+          "mae": 2.710082976765845,
+          "rmse": 5.233430637980815,
+          "mape": 7.228615469131045
+        },
+        "h6": {
+          "mae": 3.040983338472303,
+          "rmse": 6.186837206607878,
+          "mape": 8.556059373343999
+        },
+        "h12": {
+          "mae": 3.420002790795636,
+          "rmse": 7.1635118996579115,
+          "mape": 10.054300219172958
+        }
+      },
+      "interval": {
+        "coverage": 0.8996979162566997,
+        "mean_width": 12.204785204382624,
+        "winkler": 22.293726913002086
+      },
+      "interval_groups": {
+        "worst_node_horizon_coverage": 0.8773921505027571,
+        "worst_regime_coverage": 0.8855471653062462,
+        "regime_coverage": {
+          "free": 0.9066674756577229,
+          "stable_mid": 0.8884621058979741,
+          "transition": 0.8855471653062462
+        }
+      },
+      "aurc": 2.2018767399922323,
+      "selective": {
+        "coverage": 0.9855347749853887,
+        "mae": 2.987567663192749,
+        "failure_rate_5mph": 0.05023196288593825,
+        "prequential_blocks": [
+          {
+            "uncertainty_threshold": 32.08529242498859,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.05419766206163656,
+            "upper_failure_bound": 0.080850420952705
+          },
+          {
+            "uncertainty_threshold": 31.60038930578573,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.06482465462274177,
+            "upper_failure_bound": 0.09336781432625138
+          },
+          {
+            "uncertainty_threshold": 31.3706079447459,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.05844845908607864,
+            "upper_failure_bound": 0.08588265479399715
+          },
+          {
+            "uncertainty_threshold": 31.406611283136975,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.05951115834218916,
+            "upper_failure_bound": 0.08713523053893137
+          },
+          {
+            "uncertainty_threshold": 31.33236830857926,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.05951115834218916,
+            "upper_failure_bound": 0.08713523053893137
+          },
+          {
+            "uncertainty_threshold": 23.170349748893784,
+            "calibration_coverage": 0.998995983935743,
+            "empirical_failure_rate": 0.04321608040201005,
+            "upper_failure_bound": 0.06687996025019546
+          },
+          {
+            "uncertainty_threshold": 30.762348792784778,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.04984093319194061,
+            "upper_failure_bound": 0.07562164992800084
+          },
+          {
+            "uncertainty_threshold": 30.78761289646766,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.04963041182682154,
+            "upper_failure_bound": 0.07530658594694191
+          },
+          {
+            "uncertainty_threshold": 31.011963353953025,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.044444444444444446,
+            "upper_failure_bound": 0.0690919794594796
+          },
+          {
+            "uncertainty_threshold": 31.382044890308876,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.047619047619047616,
+            "upper_failure_bound": 0.07292358774086782
+          },
+          {
+            "uncertainty_threshold": 31.810028091716624,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.04973544973544974,
+            "upper_failure_bound": 0.07546378916786946
+          },
+          {
+            "uncertainty_threshold": 31.756845682968116,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.0455026455026455,
+            "upper_failure_bound": 0.07037214388461106
+          },
+          {
+            "uncertainty_threshold": 32.31941531925457,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.059893048128342244,
+            "upper_failure_bound": 0.08768604641086755
+          },
+          {
+            "uncertainty_threshold": 25.71577415457866,
+            "calibration_coverage": 0.9989247311827957,
+            "empirical_failure_rate": 0.0527448869752422,
+            "upper_failure_bound": 0.07931767432771729
+          },
+          {
+            "uncertainty_threshold": 26.49625710952662,
+            "calibration_coverage": 0.9988137603795967,
+            "empirical_failure_rate": 0.06532066508313539,
+            "upper_failure_bound": 0.0958144853157794
+          },
+          {
+            "uncertainty_threshold": 21.52761421269179,
+            "calibration_coverage": 0.9491945477075588,
+            "empirical_failure_rate": 0.06135770234986945,
+            "upper_failure_bound": 0.09280101420182554
+          },
+          {
+            "uncertainty_threshold": 21.70691024015793,
+            "calibration_coverage": 0.9479553903345725,
+            "empirical_failure_rate": 0.06143790849673202,
+            "upper_failure_bound": 0.09292026680124026
+          },
+          {
+            "uncertainty_threshold": 21.37788837804374,
+            "calibration_coverage": 0.9467162329615861,
+            "empirical_failure_rate": 0.06413612565445026,
+            "upper_failure_bound": 0.09615280786125854
+          },
+          {
+            "uncertainty_threshold": 21.438079109905445,
+            "calibration_coverage": 0.9467162329615861,
+            "empirical_failure_rate": 0.06282722513089005,
+            "upper_failure_bound": 0.0945979353593672
+          },
+          {
+            "uncertainty_threshold": 33.1712108477172,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.06487148102815178,
+            "upper_failure_bound": 0.09581376399063685
+          },
+          {
+            "uncertainty_threshold": 32.952863733931494,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.060571428571428575,
+            "upper_failure_bound": 0.08956177027090612
+          },
+          {
+            "uncertainty_threshold": 32.41084571422556,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.04845360824742268,
+            "upper_failure_bound": 0.07354471215509722
+          },
+          {
+            "uncertainty_threshold": 22.722235163734474,
+            "calibration_coverage": 0.9990079365079365,
+            "empirical_failure_rate": 0.030784508440913606,
+            "upper_failure_bound": 0.051442572539077136
+          },
+          {
+            "uncertainty_threshold": 22.61808256132081,
+            "calibration_coverage": 0.9990079365079365,
+            "empirical_failure_rate": 0.019860973187686197,
+            "upper_failure_bound": 0.0374394168015127
+          }
+        ]
+      },
+      "regimes": {
+        "free": {
+          "mae": 2.347503398641439,
+          "rmse": 4.728290716839093,
+          "mape": 5.40716337784283
+        },
+        "stable_mid": {
+          "mae": 4.322389834426012,
+          "rmse": 8.133795206279517,
+          "mape": 14.567596076104033
+        },
+        "transition": {
+          "mae": 3.7195441080842615,
+          "rmse": 7.583584329350077,
+          "mape": 11.591551268457316
+        }
+      }
+    },
+    "independent": {
+      "point": {
+        "average": {
+          "mae": 3.0202243586563724,
+          "rmse": 6.152073102669195,
+          "mape": 8.480459941707853
+        },
+        "h3": {
+          "mae": 2.732006138389662,
+          "rmse": 5.289147033800001,
+          "mape": 7.304386031649068
+        },
+        "h6": {
+          "mae": 3.0539750526406886,
+          "rmse": 6.217050304193784,
+          "mape": 8.587190243672396
+        },
+        "h12": {
+          "mae": 3.425307743698256,
+          "rmse": 7.17116394664525,
+          "mape": 10.054836991986205
+        }
+      },
+      "interval": {
+        "coverage": 0.8998550089061559,
+        "mean_width": 12.264369057388878,
+        "winkler": 22.427008614781553
+      },
+      "interval_groups": {
+        "worst_node_horizon_coverage": 0.875445994161531,
+        "worst_regime_coverage": 0.8856652996831623,
+        "regime_coverage": {
+          "free": 0.9069735908387039,
+          "stable_mid": 0.8882697947214077,
+          "transition": 0.8856652996831623
+        }
+      },
+      "aurc": 2.2109293296801464,
+      "selective": {
+        "coverage": 0.9852425482174167,
+        "mae": 3.0022239685058594,
+        "failure_rate_5mph": 0.05313700384122919,
+        "prequential_blocks": [
+          {
+            "uncertainty_threshold": 32.08529242498859,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.05419766206163656,
+            "upper_failure_bound": 0.080850420952705
+          },
+          {
+            "uncertainty_threshold": 31.57613215647846,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.06376195536663125,
+            "upper_failure_bound": 0.09212517966657897
+          },
+          {
+            "uncertainty_threshold": 31.308166820189882,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.057385759829968117,
+            "upper_failure_bound": 0.08462794205318426
+          },
+          {
+            "uncertainty_threshold": 31.332403994415262,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.05951115834218916,
+            "upper_failure_bound": 0.08713523053893137
+          },
+          {
+            "uncertainty_threshold": 31.226086918089806,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.06057385759829968,
+            "upper_failure_bound": 0.08838572172695214
+          },
+          {
+            "uncertainty_threshold": 23.374405775108052,
+            "calibration_coverage": 0.998995983935743,
+            "empirical_failure_rate": 0.044221105527638194,
+            "upper_failure_bound": 0.06809420132742522
+          },
+          {
+            "uncertainty_threshold": 30.597627224823764,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.05090137857900318,
+            "upper_failure_bound": 0.07689037153973707
+          },
+          {
+            "uncertainty_threshold": 30.584996121171148,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.050686378035902854,
+            "upper_failure_bound": 0.0765700627244537
+          },
+          {
+            "uncertainty_threshold": 30.854197824169304,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.04656084656084656,
+            "upper_failure_bound": 0.07164931518636537
+          },
+          {
+            "uncertainty_threshold": 31.221100125639662,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.04973544973544974,
+            "upper_failure_bound": 0.07546378916786946
+          },
+          {
+            "uncertainty_threshold": 31.663187926153398,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.050793650793650794,
+            "upper_failure_bound": 0.07672988293478045
+          },
+          {
+            "uncertainty_threshold": 31.608277811280576,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.0455026455026455,
+            "upper_failure_bound": 0.07037214388461106
+          },
+          {
+            "uncertainty_threshold": 32.174649591071386,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.057754010695187166,
+            "upper_failure_bound": 0.08516303954481959
+          },
+          {
+            "uncertainty_threshold": 25.485340050317262,
+            "calibration_coverage": 0.9978494623655914,
+            "empirical_failure_rate": 0.05064655172413793,
+            "upper_failure_bound": 0.07682698763026367
+          },
+          {
+            "uncertainty_threshold": 26.284390185663472,
+            "calibration_coverage": 0.9976275207591934,
+            "empirical_failure_rate": 0.06302021403091558,
+            "upper_failure_bound": 0.09312387770702915
+          },
+          {
+            "uncertainty_threshold": 21.5771767476007,
+            "calibration_coverage": 0.942998760842627,
+            "empirical_failure_rate": 0.06176084099868594,
+            "upper_failure_bound": 0.09340035673260207
+          },
+          {
+            "uncertainty_threshold": 21.856840563822114,
+            "calibration_coverage": 0.9479553903345725,
+            "empirical_failure_rate": 0.06274509803921569,
+            "upper_failure_bound": 0.09447639349288188
+          },
+          {
+            "uncertainty_threshold": 20.805152261634298,
+            "calibration_coverage": 0.9132589838909542,
+            "empirical_failure_rate": 0.05698778833107191,
+            "upper_failure_bound": 0.08826616868328824
+          },
+          {
+            "uncertainty_threshold": 21.48497807697155,
+            "calibration_coverage": 0.9343246592317225,
+            "empirical_failure_rate": 0.05702917771883289,
+            "upper_failure_bound": 0.08790485818745429
+          },
+          {
+            "uncertainty_threshold": 22.854425634118826,
+            "calibration_coverage": 0.99265605875153,
+            "empirical_failure_rate": 0.06781750924784218,
+            "upper_failure_bound": 0.0994142621017807
+          },
+          {
+            "uncertainty_threshold": 32.81533067583204,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.064,
+            "upper_failure_bound": 0.0936029147436016
+          },
+          {
+            "uncertainty_threshold": 32.269327379296584,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.05154639175257732,
+            "upper_failure_bound": 0.07723971269775126
+          },
+          {
+            "uncertainty_threshold": 23.029533746022963,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.03273809523809524,
+            "upper_failure_bound": 0.05386803747861026
+          },
+          {
+            "uncertainty_threshold": 22.915175678193453,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.022817460317460316,
+            "upper_failure_bound": 0.041292135745621086
+          }
+        ]
+      },
+      "regimes": {
+        "free": {
+          "mae": 2.3566632928627453,
+          "rmse": 4.750203627055457,
+          "mape": 5.434061878757106
+        },
+        "stable_mid": {
+          "mae": 4.351786588574723,
+          "rmse": 8.18680162433723,
+          "mape": 14.6467964694217
+        },
+        "transition": {
+          "mae": 3.7352320343801626,
+          "rmse": 7.61075736285531,
+          "mape": 11.634682281859178
+        }
+      }
+    },
+    "burst": {
+      "point": {
+        "average": {
+          "mae": 3.029696300541777,
+          "rmse": 6.178574883919168,
+          "mape": 8.523553888134833
+        },
+        "h3": {
+          "mae": 2.7439354215988514,
+          "rmse": 5.326940714799136,
+          "mape": 7.351722777935368
+        },
+        "h6": {
+          "mae": 3.062427045098249,
+          "rmse": 6.239280139732985,
+          "mape": 8.628692140860956
+        },
+        "h12": {
+          "mae": 3.43326282265289,
+          "rmse": 7.192794696669514,
+          "mape": 10.093762363754134
+        }
+      },
+      "interval": {
+        "coverage": 0.8996679301012006,
+        "mean_width": 12.318369493243503,
+        "winkler": 22.557917541764567
+      },
+      "interval_groups": {
+        "worst_node_horizon_coverage": 0.8722024002594875,
+        "worst_regime_coverage": 0.8855340392643666,
+        "regime_coverage": {
+          "free": 0.9068184755970485,
+          "stable_mid": 0.8879811985412305,
+          "transition": 0.8855340392643666
+        }
+      },
+      "aurc": 2.2151574910460443,
+      "selective": {
+        "coverage": 0.9830508474576272,
+        "mae": 3.005080223083496,
+        "failure_rate_5mph": 0.05421010425020048,
+        "prequential_blocks": [
+          {
+            "uncertainty_threshold": 32.08529242498859,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.05419766206163656,
+            "upper_failure_bound": 0.080850420952705
+          },
+          {
+            "uncertainty_threshold": 31.60820634145605,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.06588735387885228,
+            "upper_failure_bound": 0.09460859565530058
+          },
+          {
+            "uncertainty_threshold": 31.38065693927627,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.05951115834218916,
+            "upper_failure_bound": 0.08713523053893137
+          },
+          {
+            "uncertainty_threshold": 31.437385249105187,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.06376195536663125,
+            "upper_failure_bound": 0.09212517966657897
+          },
+          {
+            "uncertainty_threshold": 31.3564705474118,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.0669500531349628,
+            "upper_failure_bound": 0.09584756449686967
+          },
+          {
+            "uncertainty_threshold": 23.68915858156553,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.05120481927710843,
+            "upper_failure_bound": 0.07644573155729477
+          },
+          {
+            "uncertainty_threshold": 30.754822388096688,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.05726405090137858,
+            "upper_failure_bound": 0.08445106694083944
+          },
+          {
+            "uncertainty_threshold": 30.780253572645886,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.057022175290390706,
+            "upper_failure_bound": 0.08409952488613036
+          },
+          {
+            "uncertainty_threshold": 30.988769068321275,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.05185185185185185,
+            "upper_failure_bound": 0.07799340839048277
+          },
+          {
+            "uncertainty_threshold": 31.363927823390707,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.05502645502645503,
+            "upper_failure_bound": 0.0817692822663233
+          },
+          {
+            "uncertainty_threshold": 31.796740942776765,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.05925925925925926,
+            "upper_failure_bound": 0.08677184724403848
+          },
+          {
+            "uncertainty_threshold": 31.769528698711355,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.05185185185185185,
+            "upper_failure_bound": 0.07799340839048277
+          },
+          {
+            "uncertainty_threshold": 32.35948648644716,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.06844919786096257,
+            "upper_failure_bound": 0.09769788893180811
+          },
+          {
+            "uncertainty_threshold": 25.994593892566215,
+            "calibration_coverage": 0.9989247311827957,
+            "empirical_failure_rate": 0.061356297093649086,
+            "upper_failure_bound": 0.08951013228464975
+          },
+          {
+            "uncertainty_threshold": 22.67933345044753,
+            "calibration_coverage": 0.9774614472123369,
+            "empirical_failure_rate": 0.06796116504854369,
+            "upper_failure_bound": 0.09929801489161492
+          },
+          {
+            "uncertainty_threshold": 20.906035466148914,
+            "calibration_coverage": 0.9169764560099133,
+            "empirical_failure_rate": 0.05945945945945946,
+            "upper_failure_bound": 0.09116158514566416
+          },
+          {
+            "uncertainty_threshold": 21.921667458367804,
+            "calibration_coverage": 0.9454770755885997,
+            "empirical_failure_rate": 0.06684141546526867,
+            "upper_failure_bound": 0.09938098846534546
+          },
+          {
+            "uncertainty_threshold": 21.703714298858625,
+            "calibration_coverage": 0.9442379182156134,
+            "empirical_failure_rate": 0.06299212598425197,
+            "upper_failure_bound": 0.09484195930923076
+          },
+          {
+            "uncertainty_threshold": 21.688617286470848,
+            "calibration_coverage": 0.9405204460966543,
+            "empirical_failure_rate": 0.06060606060606061,
+            "upper_failure_bound": 0.09207081287094646
+          },
+          {
+            "uncertainty_threshold": 33.20456489417089,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.06731946144430845,
+            "upper_failure_bound": 0.09869658209209341
+          },
+          {
+            "uncertainty_threshold": 33.014958786813956,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.06285714285714286,
+            "upper_failure_bound": 0.09225820035315538
+          },
+          {
+            "uncertainty_threshold": 32.4619952321282,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.050515463917525774,
+            "upper_failure_bound": 0.07601049587810983
+          },
+          {
+            "uncertainty_threshold": 22.860741234740555,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.03273809523809524,
+            "upper_failure_bound": 0.05386803747861026
+          },
+          {
+            "uncertainty_threshold": 22.765632174602263,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.023809523809523808,
+            "upper_failure_bound": 0.04257459416992668
+          }
+        ]
+      },
+      "regimes": {
+        "free": {
+          "mae": 2.360665363534437,
+          "rmse": 4.763631603259555,
+          "mape": 5.449057865802675
+        },
+        "stable_mid": {
+          "mae": 4.375012201818727,
+          "rmse": 8.237589719835327,
+          "mape": 14.76067686602153
+        },
+        "transition": {
+          "mae": 3.7438909682085613,
+          "rmse": 7.629161745240337,
+          "mape": 11.673272039565209
+        }
+      }
+    },
+    "region": {
+      "point": {
+        "average": {
+          "mae": 3.1867771719287425,
+          "rmse": 6.648302022278078,
+          "mape": 9.47731449074637
+        },
+        "h3": {
+          "mae": 2.95190564813677,
+          "rmse": 6.017880743797666,
+          "mape": 8.529660955616905
+        },
+        "h6": {
+          "mae": 3.2128598756946007,
+          "rmse": 6.696528761023935,
+          "mape": 9.538610643144208
+        },
+        "h12": {
+          "mae": 3.5210130032583282,
+          "rmse": 7.435991831116257,
+          "mape": 10.749172778614364
+        }
+      },
+      "interval": {
+        "coverage": 0.8992605735334159,
+        "mean_width": 13.223551764110862,
+        "winkler": 24.347439295630714
+      },
+      "interval_groups": {
+        "worst_node_horizon_coverage": 0.8777165098929613,
+        "worst_regime_coverage": 0.8848996139068539,
+        "regime_coverage": {
+          "free": 0.9071423182342188,
+          "stable_mid": 0.8858743170106095,
+          "transition": 0.8848996139068539
+        }
+      },
+      "aurc": 2.329130757278939,
+      "selective": {
+        "coverage": 0.9332261835184102,
+        "mae": 3.0647549629211426,
+        "failure_rate_5mph": 0.06601549343213203,
+        "prequential_blocks": [
+          {
+            "uncertainty_threshold": 32.08529242498859,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.05419766206163656,
+            "upper_failure_bound": 0.080850420952705
+          },
+          {
+            "uncertainty_threshold": 21.25445553396052,
+            "calibration_coverage": 0.9766206163655685,
+            "empirical_failure_rate": 0.060935799782372145,
+            "upper_failure_bound": 0.08918950664600891
+          },
+          {
+            "uncertainty_threshold": 31.721046087223563,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.0669500531349628,
+            "upper_failure_bound": 0.09584756449686967
+          },
+          {
+            "uncertainty_threshold": 20.722129741420243,
+            "calibration_coverage": 0.9553666312433581,
+            "empirical_failure_rate": 0.06896551724137931,
+            "upper_failure_bound": 0.09895674265585563
+          },
+          {
+            "uncertainty_threshold": 20.75092653063328,
+            "calibration_coverage": 0.953241232731137,
+            "empirical_failure_rate": 0.06800445930880714,
+            "upper_failure_bound": 0.09787368384319495
+          },
+          {
+            "uncertainty_threshold": 21.51342101071317,
+            "calibration_coverage": 0.9759036144578314,
+            "empirical_failure_rate": 0.05864197530864197,
+            "upper_failure_bound": 0.0856075980059756
+          },
+          {
+            "uncertainty_threshold": 21.618818721787296,
+            "calibration_coverage": 0.975609756097561,
+            "empirical_failure_rate": 0.06521739130434782,
+            "upper_failure_bound": 0.09419514367945345
+          },
+          {
+            "uncertainty_threshold": 21.989958699728618,
+            "calibration_coverage": 0.9757127771911299,
+            "empirical_failure_rate": 0.06926406926406926,
+            "upper_failure_bound": 0.09884229978480112
+          },
+          {
+            "uncertainty_threshold": 22.120001360690186,
+            "calibration_coverage": 0.9756613756613757,
+            "empirical_failure_rate": 0.06832971800433839,
+            "upper_failure_bound": 0.0977912077006928
+          },
+          {
+            "uncertainty_threshold": 21.33965906164938,
+            "calibration_coverage": 0.9555555555555556,
+            "empirical_failure_rate": 0.06423034330011074,
+            "upper_failure_bound": 0.09334695788679158
+          },
+          {
+            "uncertainty_threshold": 21.811485593704802,
+            "calibration_coverage": 0.9534391534391534,
+            "empirical_failure_rate": 0.06437291897891231,
+            "upper_failure_bound": 0.0935509030429352
+          },
+          {
+            "uncertainty_threshold": 21.807712964408925,
+            "calibration_coverage": 0.9544973544973545,
+            "empirical_failure_rate": 0.058758314855875834,
+            "upper_failure_bound": 0.0869213834758396
+          },
+          {
+            "uncertainty_threshold": 21.004960554366196,
+            "calibration_coverage": 0.9112299465240642,
+            "empirical_failure_rate": 0.062206572769953054,
+            "upper_failure_bound": 0.09194082937988819
+          },
+          {
+            "uncertainty_threshold": 21.534408310352102,
+            "calibration_coverage": 0.9354838709677419,
+            "empirical_failure_rate": 0.067816091954023,
+            "upper_failure_bound": 0.09817555399308536
+          },
+          {
+            "uncertainty_threshold": 21.16553462822992,
+            "calibration_coverage": 0.8600237247924081,
+            "empirical_failure_rate": 0.06620689655172414,
+            "upper_failure_bound": 0.09959476460052169
+          },
+          {
+            "uncertainty_threshold": 20.1338961218852,
+            "calibration_coverage": 0.7843866171003717,
+            "empirical_failure_rate": 0.05687203791469194,
+            "upper_failure_bound": 0.09102708642746243
+          },
+          {
+            "uncertainty_threshold": 20.596267936702905,
+            "calibration_coverage": 0.7868649318463445,
+            "empirical_failure_rate": 0.05984251968503937,
+            "upper_failure_bound": 0.09457457068946136
+          },
+          {
+            "uncertainty_threshold": 20.507854333880257,
+            "calibration_coverage": 0.8265179677819083,
+            "empirical_failure_rate": 0.06146926536731634,
+            "upper_failure_bound": 0.09555507075101098
+          },
+          {
+            "uncertainty_threshold": 20.400666934531895,
+            "calibration_coverage": 0.8252788104089219,
+            "empirical_failure_rate": 0.06006006006006006,
+            "upper_failure_bound": 0.09388578037509082
+          },
+          {
+            "uncertainty_threshold": 22.56887075722724,
+            "calibration_coverage": 0.9020807833537332,
+            "empirical_failure_rate": 0.06512890094979647,
+            "upper_failure_bound": 0.09800197698658207
+          },
+          {
+            "uncertainty_threshold": 21.977128128675833,
+            "calibration_coverage": 0.9097142857142857,
+            "empirical_failure_rate": 0.06155778894472362,
+            "upper_failure_bound": 0.09235149877228054
+          },
+          {
+            "uncertainty_threshold": 22.207578186492974,
+            "calibration_coverage": 0.954639175257732,
+            "empirical_failure_rate": 0.06371490280777538,
+            "upper_failure_bound": 0.09233009453019321
+          },
+          {
+            "uncertainty_threshold": 24.652351205589202,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.05357142857142857,
+            "upper_failure_bound": 0.07907941185363469
+          },
+          {
+            "uncertainty_threshold": 24.280289765721466,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.044642857142857144,
+            "upper_failure_bound": 0.06842308887106331
+          }
+        ]
+      },
+      "regimes": {
+        "free": {
+          "mae": 2.456864242853595,
+          "rmse": 5.15238225796226,
+          "mape": 5.859292942830894
+        },
+        "stable_mid": {
+          "mae": 4.660202954407154,
+          "rmse": 8.83741468977263,
+          "mape": 16.954070085964464
+        },
+        "transition": {
+          "mae": 3.9522331679382803,
+          "rmse": 8.179333521875279,
+          "mape": 12.853012131141009
+        }
+      }
+    },
+    "hub": {
+      "point": {
+        "average": {
+          "mae": 3.0351844130830687,
+          "rmse": 6.177299706707603,
+          "mape": 8.519585739881705
+        },
+        "h3": {
+          "mae": 2.75371617431974,
+          "rmse": 5.333760985635188,
+          "mape": 7.357919741929727
+        },
+        "h6": {
+          "mae": 3.0688777273954053,
+          "rmse": 6.242127494837181,
+          "mape": 8.634137460092143
+        },
+        "h12": {
+          "mae": 3.435450019687176,
+          "rmse": 7.185095552907999,
+          "mape": 10.088258337237786
+        }
+      },
+      "interval": {
+        "coverage": 0.8996898842507625,
+        "mean_width": 12.294122581918344,
+        "winkler": 22.563207557679053
+      },
+      "interval_groups": {
+        "worst_node_horizon_coverage": 0.8751216347713267,
+        "worst_regime_coverage": 0.8853146468500938,
+        "regime_coverage": {
+          "free": 0.9074899030002137,
+          "stable_mid": 0.8865100050989639,
+          "transition": 0.8853146468500938
+        }
+      },
+      "aurc": 2.2147395242236856,
+      "selective": {
+        "coverage": 0.983489187609585,
+        "mae": 3.015066146850586,
+        "failure_rate_5mph": 0.060266068280173106,
+        "prequential_blocks": [
+          {
+            "uncertainty_threshold": 32.08529242498859,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.05419766206163656,
+            "upper_failure_bound": 0.080850420952705
+          },
+          {
+            "uncertainty_threshold": 31.634809518200306,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.06588735387885228,
+            "upper_failure_bound": 0.09460859565530058
+          },
+          {
+            "uncertainty_threshold": 31.476365840683417,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.05951115834218916,
+            "upper_failure_bound": 0.08713523053893137
+          },
+          {
+            "uncertainty_threshold": 31.524803940921235,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.06482465462274177,
+            "upper_failure_bound": 0.09336781432625138
+          },
+          {
+            "uncertainty_threshold": 31.45347990382318,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.06907545164718384,
+            "upper_failure_bound": 0.09832022030613688
+          },
+          {
+            "uncertainty_threshold": 23.100409968132425,
+            "calibration_coverage": 0.998995983935743,
+            "empirical_failure_rate": 0.05226130653266332,
+            "upper_failure_bound": 0.0777159698796005
+          },
+          {
+            "uncertainty_threshold": 30.88016498408208,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.05938494167550371,
+            "upper_failure_bound": 0.08695315935969285
+          },
+          {
+            "uncertainty_threshold": 30.894518109222076,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.059134107708553325,
+            "upper_failure_bound": 0.08659128945650738
+          },
+          {
+            "uncertainty_threshold": 31.061389443668997,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.05291005291005291,
+            "upper_failure_bound": 0.07925443800219716
+          },
+          {
+            "uncertainty_threshold": 31.3724397377534,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.056084656084656084,
+            "upper_failure_bound": 0.08302322523911829
+          },
+          {
+            "uncertainty_threshold": 31.79161998961296,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.05714285714285714,
+            "upper_failure_bound": 0.08427492941940819
+          },
+          {
+            "uncertainty_threshold": 31.761312318666,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.04867724867724868,
+            "upper_failure_bound": 0.07419505086051106
+          },
+          {
+            "uncertainty_threshold": 32.38687142837319,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.06844919786096257,
+            "upper_failure_bound": 0.09769788893180811
+          },
+          {
+            "uncertainty_threshold": 25.61800761769523,
+            "calibration_coverage": 0.9989247311827957,
+            "empirical_failure_rate": 0.061356297093649086,
+            "upper_failure_bound": 0.08951013228464975
+          },
+          {
+            "uncertainty_threshold": 22.87665003312847,
+            "calibration_coverage": 0.9750889679715302,
+            "empirical_failure_rate": 0.06569343065693431,
+            "upper_failure_bound": 0.09667478006275661
+          },
+          {
+            "uncertainty_threshold": 21.78176463929402,
+            "calibration_coverage": 0.9454770755885997,
+            "empirical_failure_rate": 0.06684141546526867,
+            "upper_failure_bound": 0.09938098846534546
+          },
+          {
+            "uncertainty_threshold": 21.19808525396247,
+            "calibration_coverage": 0.9169764560099133,
+            "empirical_failure_rate": 0.05675675675675676,
+            "upper_failure_bound": 0.08791430483820846
+          },
+          {
+            "uncertainty_threshold": 21.057412162072676,
+            "calibration_coverage": 0.9157372986369269,
+            "empirical_failure_rate": 0.06224627875507442,
+            "upper_failure_bound": 0.09451926429917869
+          },
+          {
+            "uncertainty_threshold": 21.01206906402491,
+            "calibration_coverage": 0.9169764560099133,
+            "empirical_failure_rate": 0.060810810810810814,
+            "upper_failure_bound": 0.09277950050676809
+          },
+          {
+            "uncertainty_threshold": 21.808082852575936,
+            "calibration_coverage": 0.9632802937576499,
+            "empirical_failure_rate": 0.06353240152477764,
+            "upper_failure_bound": 0.09489748090719102
+          },
+          {
+            "uncertainty_threshold": 22.50390520083113,
+            "calibration_coverage": 0.9931428571428571,
+            "empirical_failure_rate": 0.06789413118527042,
+            "upper_failure_bound": 0.09828666871003972
+          },
+          {
+            "uncertainty_threshold": 32.361683326141936,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.05567010309278351,
+            "upper_failure_bound": 0.08213361141059773
+          },
+          {
+            "uncertainty_threshold": 22.734183288085656,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.037698412698412696,
+            "upper_failure_bound": 0.05998975799558183
+          },
+          {
+            "uncertainty_threshold": 22.636082699527723,
+            "calibration_coverage": 1.0,
+            "empirical_failure_rate": 0.028769841269841268,
+            "upper_failure_bound": 0.04889842888871581
+          }
+        ]
+      },
+      "regimes": {
+        "free": {
+          "mae": 2.3594057175489165,
+          "rmse": 4.753519523174085,
+          "mape": 5.425868945948443
+        },
+        "stable_mid": {
+          "mae": 4.394970734438894,
+          "rmse": 8.239645471699172,
+          "mape": 14.771661148363775
+        },
+        "transition": {
+          "mae": 3.754404745045401,
+          "rmse": 7.651486097442513,
+          "mape": 11.747049265257695
+        }
+      }
+    }
+  }
+}

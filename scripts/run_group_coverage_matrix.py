@@ -5,6 +5,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from shiftguard.registry import REFERENCE_MODEL
+
 
 def complete(path: Path) -> bool:
     if not path.exists():
@@ -18,7 +20,7 @@ def complete(path: Path) -> bool:
 
 def main() -> None:
     for dataset in ("METR-LA", "PEMS-BAY"):
-        for model in ("shiftguard", "staeformer"):
+        for model in (REFERENCE_MODEL, "staeformer"):
             for seed in (1, 12, 42, 123, 2026):
                 for rate in (0.1, 0.3, 0.5):
                     result = Path(

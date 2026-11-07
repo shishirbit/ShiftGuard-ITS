@@ -7,7 +7,14 @@ from pathlib import Path
 import numpy as np
 import torch
 from torch.utils.data import DataLoader, TensorDataset
-from train import build_model, correlation_adjacency, load_split, unpack
+from train import (
+    MODEL_CHOICES,
+    base_model_name,
+    build_model,
+    correlation_adjacency,
+    load_split,
+    unpack,
+)
 
 from shiftguard.calibration import (
     finite_mean,
@@ -89,29 +96,7 @@ def regime_labels(raw_x: np.ndarray, raw_y: np.ndarray) -> np.ndarray:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset", choices=["METR-LA", "PEMS-BAY"], required=True)
-    parser.add_argument(
-        "--model",
-        choices=[
-            "persistence",
-            "linear",
-            "mlp",
-            "gru",
-            "stgcn",
-            "dcrnn",
-            "graphwavenet",
-            "agcrn",
-            "stid",
-            "staeformer",
-            "shiftguard",
-            "shiftguard_noreliability",
-            "shiftguard_staticgraph",
-            "shiftguard_adaptivegraph",
-            "shiftguard_norouter",
-            "shiftguard_noaugmentation",
-            "shiftguard_independentaugmentation",
-        ],
-        required=True,
-    )
+    parser.add_argument("--model", choices=MODEL_CHOICES, required=True)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--rate", type=float, default=0.3)
     parser.add_argument("--data-root", type=Path, default=Path("data/processed"))
@@ -124,7 +109,7 @@ def main() -> None:
     )
     parser.add_argument("--selection", choices=["risk", "all"], default="risk")
     args = parser.parse_args()
-    if args.model == "staeformer":
+    if base_model_name(args.model) == "staeformer":
         args.batch_size = min(args.batch_size, 24)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     root = args.data_root / args.dataset

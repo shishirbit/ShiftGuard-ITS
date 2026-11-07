@@ -12,12 +12,19 @@ from torch import nn
 from torch.utils.data import DataLoader, TensorDataset
 
 from shiftguard.checkpointing import restore_training_state, save_training_state
+from shiftguard.registry import (
+    CANDIDATE_MODELS,
+    LEGACY_ABLATIONS,
+    REFERENCE_ABLATIONS,
+    shiftguard_flags,
+)
 from shiftguard.metrics import horizon_metrics
 from shiftguard.models import (
     AGCRNBaseline,
     DCRNNBaseline,
     GraphWaveNetBaseline,
     GRUBaseline,
+    LaplaceHead,
     LinearBaseline,
     MLPBaseline,
     Persistence,
@@ -55,41 +62,103 @@ def correlation_adjacency(x: torch.Tensor, top_k: int = 12) -> torch.Tensor:
     return torch.from_numpy(adjacency)
 
 
+BASE_MODELS = (
+    "persistence",
+    "linear",
+    "mlp",
+    "gru",
+    "stgcn",
+    "dcrnn",
+    "graphwavenet",
+    "agcrn",
+    "stid",
+    "staeformer",
+    *dict.fromkeys(("shiftguard", *LEGACY_ABLATIONS, *REFERENCE_ABLATIONS, *CANDIDATE_MODELS)),
+)
+# Baselines retrained with ShiftGuard's structured-outage augmentation, so that
+# stress comparisons separate the training recipe from the architecture.
+OUTAGE_AUGMENTED_SUFFIX = "_outageaug"
+OUTAGE_AUGMENTED_BASELINES = (
+    "mlp",
+    "gru",
+    "dcrnn",
+    "graphwavenet",
+    "agcrn",
+    "stid",
+    "staeformer",
+)
+# Same baselines with ShiftGuard's Laplace median/scale output and loss, so
+# conformal intervals and risk control are compared on equal footing.
+LAPLACE_SUFFIX = "_laplace"
+MODEL_CHOICES = (
+    BASE_MODELS
+    + tuple(f"{name}{OUTAGE_AUGMENTED_SUFFIX}" for name in OUTAGE_AUGMENTED_BASELINES)
+    + tuple(
+        f"{name}{OUTAGE_AUGMENTED_SUFFIX}{LAPLACE_SUFFIX}"
+        for name in OUTAGE_AUGMENTED_BASELINES
+    )
+)
+
+
+def base_model_name(name: str) -> str:
+    return name.removesuffix(LAPLACE_SUFFIX).removesuffix(OUTAGE_AUGMENTED_SUFFIX)
+
+
 def build_model(name: str, nodes: int, adjacency: torch.Tensor) -> nn.Module:
+    if name.endswith(LAPLACE_SUFFIX):
+        horizon = 12
+        return LaplaceHead(build_baseline(base_model_name(name), nodes, adjacency, 2 * horizon), horizon)
+    name = base_model_name(name)
+    if name in OUTAGE_AUGMENTED_BASELINES:
+        return build_baseline(name, nodes, adjacency)
     if name == "persistence":
         return Persistence()
     if name == "linear":
         return LinearBaseline()
-    if name == "mlp":
-        return MLPBaseline()
-    if name == "stid":
-        return STIDBaseline(nodes)
-    if name == "staeformer":
-        return STAEformerBaseline(nodes)
-    if name == "gru":
-        return GRUBaseline()
     if name == "stgcn":
         return STGCNBaseline(adjacency)
-    if name == "graphwavenet":
-        return GraphWaveNetBaseline(nodes, adjacency)
+    if name.startswith("shiftguard"):
+        flags = shiftguard_flags(name)
+        options = {}
+        if "norouter" in flags:
+            options["regimes"] = 1
+        if "global" in flags:
+            options["global_tokens"] = 16
+        if "tempattn" in flags:
+            options["temporal_attention"] = True
+        if "profile" in flags:
+            options["profile_anchor"] = True
+        if "wide" in flags:
+            options.update(hidden=72, graph_layers=4)
+        return ShiftGuard(
+            nodes,
+            adjacency,
+            use_reliability="noreliability" not in flags,
+            use_adaptive_adjacency="staticgraph" not in flags,
+            use_static_adjacency="adaptivegraph" not in flags,
+            use_mask_input="nomaskinput" not in flags,
+            **options,
+        )
+    raise ValueError(name)
+
+
+def build_baseline(
+    name: str, nodes: int, adjacency: torch.Tensor, horizon: int = 12
+) -> nn.Module:
+    if name == "mlp":
+        return MLPBaseline(horizon=horizon)
+    if name == "gru":
+        return GRUBaseline(horizon=horizon)
     if name == "dcrnn":
-        return DCRNNBaseline(adjacency)
+        return DCRNNBaseline(adjacency, horizon=horizon)
+    if name == "graphwavenet":
+        return GraphWaveNetBaseline(nodes, adjacency, horizon=horizon)
     if name == "agcrn":
-        return AGCRNBaseline(nodes)
-    if name == "shiftguard":
-        return ShiftGuard(nodes, adjacency)
-    if name == "shiftguard_noreliability":
-        return ShiftGuard(nodes, adjacency, use_reliability=False)
-    if name == "shiftguard_staticgraph":
-        return ShiftGuard(nodes, adjacency, use_adaptive_adjacency=False)
-    if name == "shiftguard_adaptivegraph":
-        return ShiftGuard(nodes, adjacency, use_static_adjacency=False)
-    if name == "shiftguard_norouter":
-        return ShiftGuard(nodes, adjacency, regimes=1)
-    if name == "shiftguard_noaugmentation":
-        return ShiftGuard(nodes, adjacency)
-    if name == "shiftguard_independentaugmentation":
-        return ShiftGuard(nodes, adjacency)
+        return AGCRNBaseline(nodes, horizon=horizon)
+    if name == "stid":
+        return STIDBaseline(nodes, horizon=horizon)
+    if name == "staeformer":
+        return STAEformerBaseline(nodes, horizon=horizon)
     raise ValueError(name)
 
 
@@ -139,6 +208,12 @@ def structured_observation_mask(x: torch.Tensor) -> torch.Tensor:
     return mask
 
 
+def mask_inputs(x: torch.Tensor, observed: torch.Tensor) -> torch.Tensor:
+    """Zero standardized speeds at unobserved positions; keep other channels."""
+
+    return torch.cat([x[..., :1] * observed, x[..., 1:]], dim=-1)
+
+
 @torch.no_grad()
 def predict(
     model: nn.Module,
@@ -162,29 +237,7 @@ def predict(
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset", choices=["METR-LA", "PEMS-BAY"], required=True)
-    parser.add_argument(
-        "--model",
-        choices=[
-            "persistence",
-            "linear",
-            "mlp",
-            "gru",
-            "stgcn",
-            "dcrnn",
-            "graphwavenet",
-            "agcrn",
-            "stid",
-            "staeformer",
-            "shiftguard",
-            "shiftguard_noreliability",
-            "shiftguard_staticgraph",
-            "shiftguard_adaptivegraph",
-            "shiftguard_norouter",
-            "shiftguard_noaugmentation",
-            "shiftguard_independentaugmentation",
-        ],
-        required=True,
-    )
+    parser.add_argument("--model", choices=MODEL_CHOICES, required=True)
     parser.add_argument("--data-root", type=Path, default=Path("data/processed"))
     parser.add_argument("--output-root", type=Path, default=Path("artifacts"))
     parser.add_argument("--seed", type=int, default=42)
@@ -205,9 +258,15 @@ def main() -> None:
     use_amp = args.amp and device.type == "cuda"
     staeformer_cap = 32 if use_amp else 24
     effective_batch_size = (
-        min(args.batch_size, staeformer_cap) if args.model == "staeformer" else args.batch_size
+        min(args.batch_size, staeformer_cap)
+        if base_model_name(args.model) == "staeformer"
+        else args.batch_size
     )
-    inference_batch_size = min(effective_batch_size * 2, 8) if args.model == "staeformer" else effective_batch_size * 2
+    inference_batch_size = (
+        min(effective_batch_size * 2, 8)
+        if base_model_name(args.model) == "staeformer"
+        else effective_batch_size * 2
+    )
     loaders = {
         "train": DataLoader(TensorDataset(train_x, train_y), effective_batch_size, shuffle=True),
         "val": DataLoader(TensorDataset(val_x, val_y), inference_batch_size),
@@ -243,13 +302,18 @@ def main() -> None:
             for x, y in loaders["train"]:
                 x, y = x.to(device), y.to(device)
                 optimizer.zero_grad(set_to_none=True)
-                if args.model == "shiftguard_noaugmentation":
+                if args.model.endswith("_noaugmentation"):
                     observed = torch.ones_like(x[..., :1])
-                elif args.model == "shiftguard_independentaugmentation":
+                elif args.model.endswith("_independentaugmentation"):
                     rate = float(torch.empty(1).uniform_(0.0, 0.4))
                     observed = (torch.rand_like(x[..., :1]) >= rate).to(x.dtype)
                 elif args.model.startswith("shiftguard"):
                     observed = structured_observation_mask(x)
+                elif OUTAGE_AUGMENTED_SUFFIX in args.model:
+                    # Baselines ignore `observed`, so zero the masked inputs exactly
+                    # as evaluate_stress.infer does at test time.
+                    observed = structured_observation_mask(x)
+                    x = mask_inputs(x, observed)
                 else:
                     observed = torch.ones_like(x[..., :1])
                 backward_batch(model, x, y, observed, use_amp, args.microbatch_size)

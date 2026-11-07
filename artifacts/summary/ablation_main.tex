@@ -1,20 +1,10 @@
-\begin{tabular}{llrrr}
+\begin{tabular}{llrrrr}
 \toprule
-Dataset & Variant & MAE & AURC & Retained \\
+Dataset & Variant & MAE & AURC & Retained & Seeds \\
 \midrule
-METR-LA & ShiftGuard & 3.399 & 2.400 & 0.864 \\
-METR-LA & Adaptive graph only & 3.319 & 2.362 & 0.884 \\
-METR-LA & Independent masking only & 3.496 & 2.508 & 0.820 \\
-METR-LA & No outage augmentation & 3.705 & 2.657 & 0.740 \\
-METR-LA & No reliability conditioning & 3.256 & 2.339 & 0.906 \\
-METR-LA & No regime router & 3.372 & 2.392 & 0.872 \\
-METR-LA & Static graph only & 3.469 & 2.448 & 0.841 \\
-PEMS-BAY & ShiftGuard & 1.948 & 1.130 & 0.978 \\
-PEMS-BAY & Adaptive graph only & 1.884 & 1.108 & 0.983 \\
-PEMS-BAY & Independent masking only & 2.168 & 1.204 & 0.935 \\
-PEMS-BAY & No outage augmentation & 2.651 & 1.735 & 0.917 \\
-PEMS-BAY & No reliability conditioning & 1.881 & 1.098 & 0.979 \\
-PEMS-BAY & No regime router & 1.927 & 1.115 & 0.977 \\
-PEMS-BAY & Static graph only & 2.056 & 1.238 & 0.952 \\
+METR-LA & + reliability weighting (legacy model) & 3.399 & 2.400 & 0.864 & 5 \\
+METR-LA & ShiftGuard & 3.256 & 2.339 & 0.906 & 5 \\
+PEMS-BAY & + reliability weighting (legacy model) & 1.948 & 1.130 & 0.978 & 5 \\
+PEMS-BAY & ShiftGuard & 1.881 & 1.098 & 0.979 & 5 \\
 \bottomrule
 \end{tabular}

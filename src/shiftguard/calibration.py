@@ -150,16 +150,23 @@ def prequential_calibration(
     groupwise: bool = True,
     update: bool = True,
     risk_control: bool = True,
+    feedback_target: np.ndarray | None = None,
+    certificate_stride: int = 1,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, list[AbstentionRule]]:
     """Leakage-safe block-prequential intervals and acceptance decisions.
 
     At each block boundary, calibration uses validation residuals and only test
     forecast origins whose complete horizon has already elapsed. Thus no target
     from the evaluated block or its unresolved predecessor forecasts is used.
+
+    ``feedback_target`` replaces ``test_target`` as the resolved outcomes the
+    calibrator may read; NaN marks readings a failed sensor never reported.
+    ``certificate_stride`` thins the risk certificate's origins, so a stride of
+    the horizon gives it forecast tensors with non-overlapping targets.
     """
 
     arrays = [
-        np.asarray(value, dtype=np.float64)
+        np.asarray(value, dtype=np.result_type(value, np.float32))
         for value in (
             calibration_target,
             calibration_point,
@@ -184,15 +191,22 @@ def prequential_calibration(
     accepted = np.zeros_like(point, dtype=bool)
     rules: list[AbstentionRule] = []
     horizon = target.shape[1]
+    feedback = target if feedback_target is None else np.asarray(feedback_target, dtype=target.dtype)
+    if feedback.shape != target.shape:
+        raise ValueError("feedback and test targets must have equal shapes")
     for start in range(0, len(target), block_size):
         stop = min(start + block_size, len(target))
         known_stop = max(0, start - horizon) if update else 0
-        history_target = np.concatenate([cal_target, target[:known_stop]])[-window:]
+        history_target = np.concatenate([cal_target, feedback[:known_stop]])[-window:]
         history_point = np.concatenate([cal_point, point[:known_stop]])[-window:]
         history_scale = np.concatenate([cal_scale, scale[:known_stop]])[-window:]
         scores = np.abs(history_target - history_point) / np.maximum(history_scale, 1e-4)
         if groupwise:
             quantiles = conformal_group_quantiles(scores, alpha)
+            if feedback_target is not None:
+                # A long outage can empty a sensor's calibration group.
+                pooled = conformal_quantile(scores, alpha)
+                quantiles = np.where(np.isfinite(quantiles), quantiles, pooled)
         else:
             quantiles = np.full(target.shape[1:], conformal_quantile(scores, alpha))
         radius = scale[start:stop] * quantiles[None]
@@ -203,8 +217,8 @@ def prequential_calibration(
         origin_uncertainty = finite_mean(history_width, group_axes)
         if risk_control:
             rule = calibrate_abstention(
-                origin_error,
-                origin_uncertainty,
+                origin_error[::certificate_stride],
+                origin_uncertainty[::certificate_stride],
                 error_tolerance=error_tolerance,
                 risk_limit=risk_limit,
                 delta=delta,

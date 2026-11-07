@@ -6,6 +6,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from shiftguard.registry import LEGACY_ABLATIONS, REFERENCE_ABLATIONS, REFERENCE_MODEL
+
 
 PRIMARY_MODELS = (
     "persistence",
@@ -18,16 +20,14 @@ PRIMARY_MODELS = (
     "agcrn",
     "stid",
     "staeformer",
-    "shiftguard",
+    REFERENCE_MODEL,
 )
-ABLATIONS = (
-    "shiftguard_noreliability",
-    "shiftguard_staticgraph",
-    "shiftguard_adaptivegraph",
-    "shiftguard_norouter",
-    "shiftguard_noaugmentation",
-    "shiftguard_independentaugmentation",
+ABLATIONS = tuple(
+    name
+    for name in dict.fromkeys((*REFERENCE_ABLATIONS, *LEGACY_ABLATIONS))
+    if name != REFERENCE_MODEL
 )
+
 RISK_UNIT = "forecast_origin_mean_absolute_error"
 PROTOCOL_VERSION = "origin-risk-v1"
 
@@ -95,15 +95,29 @@ def main() -> None:
     parser.add_argument("--rates", nargs="+", type=float, default=[0.1, 0.3, 0.5])
     parser.add_argument("--ablation-rate", type=float, default=0.3)
     parser.add_argument("--batch-size", type=int, default=64)
+    parser.add_argument("--models", nargs="+", default=list(PRIMARY_MODELS))
+    parser.add_argument(
+        "--primary-only",
+        action="store_true",
+        help="Skip the ShiftGuard ablation and calibration-variant evaluations.",
+    )
+    parser.add_argument(
+        "--skip-ablations",
+        action="store_true",
+        help="Skip only the ablation evaluations (e.g. before ablations are trained).",
+    )
     args = parser.parse_args()
 
     for dataset in args.datasets:
-        for model in PRIMARY_MODELS:
+        for model in args.models:
             for seed in args.seeds:
                 for rate in args.rates:
                     evaluate(args.artifact_root, dataset, model, seed, rate, args.batch_size)
 
-    for dataset in args.datasets:
+    if args.primary_only:
+        return
+
+    for dataset in [] if args.skip_ablations else args.datasets:
         for model in ABLATIONS:
             for seed in args.seeds:
                 evaluate(
@@ -125,7 +139,7 @@ def main() -> None:
                 evaluate(
                     args.artifact_root,
                     dataset,
-                    "shiftguard",
+                    REFERENCE_MODEL,
                     seed,
                     args.ablation_rate,
                     args.batch_size,

@@ -8,6 +8,8 @@ import numpy as np
 import pandas as pd
 from scipy.stats import wilcoxon
 
+from shiftguard.registry import REFERENCE_MODEL
+
 
 @cache
 def origin_mae(path: Path) -> np.ndarray:
@@ -41,7 +43,7 @@ def holm_adjust(p_values: list[float]) -> list[float]:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Paired daily-block inference for model MAE.")
     parser.add_argument("--artifact-root", type=Path, default=Path("artifacts"))
-    parser.add_argument("--proposed", default="shiftguard")
+    parser.add_argument("--proposed", default=REFERENCE_MODEL)
     parser.add_argument("--block-size", type=int, default=288)
     parser.add_argument("--bootstrap", type=int, default=10_000)
     parser.add_argument("--seed", type=int, default=2026)

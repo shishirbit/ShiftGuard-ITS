@@ -1,0 +1,100 @@
+\documentclass[10pt]{letter}
+\usepackage[a4paper,margin=22mm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xcolor}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{3pt}
+\pagestyle{empty}
+% Marks numbers that depend on running experiments; resolve before submission.
+\newcommand{\pending}[1]{\textcolor{red}{[PENDING: #1]}}
+% Seed-1 value from the fair-baseline run; replace with the five-seed result.
+\newcommand{\provisional}[1]{\textcolor{orange}{#1}}
+
+\signature{Shishir Singh Chauhan\\Manipal University Jaipur}
+\address{Shishir Singh Chauhan\\
+Manipal University Jaipur\\
+Dehmi Kalan, Jaipur-Ajmer Expressway\\
+Jaipur 303007, Rajasthan, India}
+
+\begin{document}
+
+\begin{letter}{The Editors\\
+Transportation Research Part C: Emerging Technologies}
+
+\opening{Dear Editors,}
+
+Please consider my manuscript, ``\textbf{ShiftGuard: Risk-Controlled
+Spatiotemporal Traffic Forecasting under Compound Regime Shifts and Sensor
+Outages},'' for publication as a full-length research article in
+\textit{Transportation Research Part C: Emerging Technologies}.
+
+Network-wide speed forecasts feed route guidance, ramp metering, and incident
+management, yet the benchmarks used to compare forecasting models assume that
+every detector reports and that traffic conditions resemble the training
+period. Traffic management centers face the opposite: loop detectors fail
+singly, along corridors, or across the whole network, often while traffic is
+moving between free flow and congestion. The manuscript asks a question that
+matters to such centers: when detectors fail and conditions shift, can a
+forecaster still be accurate, report honest uncertainty, and tell the operator
+when its forecast should not be used?
+
+The manuscript makes three contributions.
+\begin{enumerate}
+  \item A deployment-feasible evaluation in which detector outages persist
+  across forecast origins, outcomes from failed detectors are withheld from
+  calibration, and abstention is scored against a historical-profile fallback.
+  Scenarios replay real availability traces and simulate detector, corridor-like,
+  and hub failures on METR-LA and PEMS-BAY. An audit of our earlier stress protocol
+  is reported openly.
+  \item A model-agnostic reliability recipe: training on outage-shaped
+  observation masks, a Laplace median--scale output, rolling node--horizon
+  conformal calibration, a forecast-level act/abstain rule whose threshold is
+  chosen and certified on disjoint past data, and evidence gating for silent
+  detectors.
+  \item A test of whether the recipe or the architecture carries the robustness.
+  Standard baselines from DCRNN to STAEformer are retrained with the identical
+  recipe, and ablations of the compact reference model, ShiftGuard, are reported in
+  full, including the components that did not help.
+\end{enumerate}
+
+Averaged over five outage scenarios, ShiftGuard's mean absolute error is 3.23 and
+1.80 mph on METR-LA and PEMS-BAY, against 3.48 and 2.22 mph for STAEformer, the
+strongest published baseline we reproduced, using about 14 times fewer parameters.
+It releases 97\% and 99.7\% of forecasts with 8.2\% and 1.6\% failure. When the
+baselines receive the same recipe, their error falls by 0.27--0.50 mph, and
+recipe-equipped STAEformer becomes 0.05--0.08 mph more accurate than ShiftGuard: the
+robustness belongs to the recipe, and ShiftGuard is its efficient implementation. The
+manuscript also reports results that limit these claims: the gain is small on
+replayed real outage traces, abstaining to a historical fallback did not lower error,
+the risk target is missed during METR-LA region outages and network-wide dropouts,
+and the risk certificate weakens substantially once forecast origins are made
+non-overlapping.
+
+The claims are deliberately bounded. ShiftGuard is not a clean-data state of the
+art, the reference model was selected on validation data only, and neither test
+set contains congested traffic. Replayed traces are retrospective, so the manuscript
+does not claim operational dependability established by field deployment. I believe this candor, together with the reusable protocol and
+recipe, suits the journal's interest in emerging technologies whose
+reliability can be assessed before deployment. The work should interest readers
+working on traffic forecasting, detector data quality, uncertainty
+quantification, and decision support in traffic management.
+
+The implementation, configurations, fixed seeds, outage generators, and
+table-generation scripts are available at
+\href{https://github.com/shishirbit/ShiftGuard-ITS}{github.com/shishirbit/ShiftGuard-ITS},
+and the manuscript gives official access information for both datasets.
+
+I confirm that this manuscript is original, has not been published previously,
+and is not under consideration by another journal. I am the sole author and
+have approved its submission. The study uses previously published benchmark
+data and involves no human participants, human samples, or animals. I have no
+competing interests to declare.
+
+Thank you for considering this work.
+
+\closing{Sincerely,}
+
+\end{letter}
+\end{document}
