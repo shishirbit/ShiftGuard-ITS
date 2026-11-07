@@ -54,7 +54,9 @@ trace (3.222 versus 3.224 mph). With feasible calibration it releases 97\% and
 100\% with 6.6\% for STAEformer. Removing outage augmentation costs 0.22 and
 0.46 mph, the largest ablation effect. To separate recipe from architecture, five
 baselines are retrained with the same augmentation and Laplace output;
-\pending{final transfer result across five seeds}. Of four registered hypotheses,
+the recipe lowers their outage MAE by 0.27--0.50 mph, and recipe-equipped
+STAEformer is 0.075 and 0.045 mph more accurate than ShiftGuard, so the robustness
+belongs to the recipe rather than to ShiftGuard's architecture. Of four registered hypotheses,
 evidence gating lowered blind-sensor error, left fresh-sensor error unchanged,
 and improved blind-sensor coverage, but abstaining to a historical fallback did
 not lower MAE. When the risk certificate is limited to origins with non-overlapping
@@ -197,10 +199,12 @@ Under that protocol, ShiftGuard averages 3.23 and 1.80 mph across five outage
 scenarios on METR-LA and PEMS-BAY, against 3.48 and 2.22 mph for STAEformer, and
 it releases far more forecasts on METR-LA at lower failure. The gain is concentrated
 in the synthetic scenarios: on replayed real traces it is 0.002--0.05 mph at
-one trace. \pending{Five-seed result: how far the recipe lifts the baselines, and
-whether a recipe-equipped baseline overtakes ShiftGuard.} Abstaining to a
+one trace. Retraining five baselines with the same recipe lowers their outage MAE
+by 0.27--0.50 mph, and recipe-equipped STAEformer then overtakes ShiftGuard by
+0.075 and 0.045 mph, mainly under region outages and on real traces. Abstaining to a
 historical fallback controls failure but does not lower MAE. ShiftGuard uses about
-14 times fewer parameters than STAEformer. These results position the work as a
+14 times fewer parameters than STAEformer and delivers 8--16 times its batch-eight
+throughput. These results position the work as a
 transferable robustness and decision-reliability recipe with an efficient
 reference implementation, not as a universal clean-data state of the art or a
 better architecture.
@@ -223,7 +227,8 @@ This work makes four contributions:
   Five baselines, from DCRNN to STAEformer, are retrained with the identical
   augmentation and with the identical probabilistic output, and are evaluated on
   the same outage timelines, with results reported on seeds shared by each
-  comparison. \pending{State the five-seed transfer result.} Ablations of
+  comparison. The recipe improves every baseline, and with it STAEformer becomes
+the most accurate model on both datasets, ahead of ShiftGuard. Ablations of
   the reference model are reported in full, including negative results for
   reliability-weighted propagation and regime routing.
   \item We provide ShiftGuard, an efficient reference implementation of the
@@ -1447,15 +1452,29 @@ Each baseline is compared in three forms, as published, with outage augmentation
 and with outage augmentation plus the Laplace output, against ShiftGuard on the
 timelines of Section~\ref{sec:deployment-protocol}.
 Table~\ref{tab:dep-recipe} and Figure~\ref{fig:dep-recipe} use only seeds shared by
-every form of a baseline and ShiftGuard. \pending{Most of these comparisons have only
-one seed so far. Rewrite this paragraph from the five-seed table, and decide the
-paper's main claim.} On the seeds finished so far, outage augmentation lowers MAE
-for every baseline on both datasets. With STID, the only baseline with enough seeds
-for a firm reading, the reduction is 0.27 mph on METR-LA and 0.32 mph on PEMS-BAY.
-The Laplace output gives up some of that accuracy on most baselines but raises
-METR-LA retention from 2--66\% to 81--97\% at failure near or below the 10\% limit. On one
-seed, recipe-equipped STAEformer is more accurate than ShiftGuard on METR-LA (by 0.12
-mph with augmentation alone) and is level with it on PEMS-BAY.
+every form of a baseline and ShiftGuard; all comparisons have five seeds.
+Outage augmentation lowers MAE for every baseline on both datasets, by 0.27--0.50 mph
+on METR-LA and 0.32--0.50 mph on PEMS-BAY. The Laplace output costs up to 0.16 mph
+(STID) and little or nothing elsewhere, but it raises METR-LA retention from
+2--73\% to 81--98\% with failure between 7.8\% and 9.7\%, below the 10\% limit.
+With the recipe, STAEformer is more accurate than ShiftGuard on both datasets: by
+0.075 mph on METR-LA (paired 95\% interval $[0.044,0.115]$) and 0.045 mph on
+PEMS-BAY ($[0.013,0.077]$), and the gap persists after evidence gating. Its
+advantage comes mainly from region outages (about 0.19 mph on both datasets) and
+replayed traces (0.02--0.10 mph); under sensor and hub outages the two are level,
+and ShiftGuard remains better on native data. The other four recipe-equipped
+baselines stay 0.18--0.53 mph behind ShiftGuard. We therefore attribute the
+robustness to the recipe, not to ShiftGuard's architecture, and treat ShiftGuard as
+an efficient implementation of it (Table~\ref{tab:efficiency}).
+To check whether the gap is architectural, we screened seven ShiftGuard variants
+after these results were known, adding global node tokens, temporal attention, a
+wider backbone, and a learned profile anchor for silent detectors. The screen used
+one seed and validation data only, and no test results were consulted. The best
+variant lowered validation error under stress by 0.06 mph relative to the reference
+model, but it remained 0.085 mph behind recipe-equipped STAEformer, again mainly
+under region outages. We therefore kept the reference model and report the screen
+only as evidence that the remaining gap is not closed by routine architectural
+changes.
 \begin{table*}[t]
   \centering
   \caption{Recipe versus architecture, averaged over the five outage scenarios on
@@ -1477,17 +1496,17 @@ mph with augmentation alone) and is level with it on PEMS-BAY.
 \label{sec:dep-ablation}
 Table~\ref{tab:dep-ablation} and Figure~\ref{fig:dep-ablation} remove one component
 of ShiftGuard at a time under the deployment scenarios, comparing each variant with
-ShiftGuard on shared seeds. \pending{Rerun once the remaining ablation seeds finish:
-two PEMS-BAY variants are not yet scored.} Outage augmentation is the dominant
-component: removing it raises MAE by 0.217 and 0.460 mph, and increases blind-sensor
-error by 0.75 and 1.91 mph. Independent masking recovers only part of that on METR-LA
-(+0.121 mph). Restoring reliability weighting worsens MAE by 0.13 and 0.04 mph,
-with intervals excluding zero, which is consistent with the validation-based
+ShiftGuard on shared seeds; every variant has five seeds. Outage augmentation is the
+dominant component: removing it raises MAE by 0.217 and 0.460 mph, and increases
+blind-sensor error by 0.75 and 1.91 mph. Independent masking recovers only part of
+that (+0.121 and +0.342 mph). Restoring reliability weighting worsens MAE by 0.13 and
+0.04 mph, with intervals excluding zero, which is consistent with the validation-based
 selection. The regime router has no detectable effect (0.005 mph on
 both datasets, intervals include zero), so it could be removed. Using only the static
 graph costs 0.04--0.08 mph, whereas using only the adaptive graph is
-indistinguishable from the reference on METR-LA. The mask input matters little on
-METR-LA (+0.021 mph), although one PEMS-BAY seed suggests more (+0.091 mph). These results support simplifying the model further and
+indistinguishable from the reference on METR-LA and slightly better on PEMS-BAY
+($-0.021$ mph, interval $[-0.031,-0.012]$). Removing the mask input costs 0.026 and
+0.070 mph, small but with intervals excluding zero. These results support simplifying the model further and
 locating its robustness in the training distribution rather than in its modules.
 \begin{table}[t]
   \centering
@@ -1639,10 +1658,10 @@ the level of the recipe rather than the architecture.
 
 ShiftGuard uses 89k/100k parameters on METR-LA/PEMS-BAY versus
 1.26M/1.37M for STAEformer; disabling reliability weighting does not change
-the parameter count. \pending{Re-measure on an idle GPU; legacy-model values:}
-its batch-one latency is 2.30/2.43 ms, and its
-batch-eight throughput is 3567/3335 samples s$^{-1}$, compared with 503/269
-for STAEformer on the same RTX 5060 Laptop GPU. Table~\ref{tab:efficiency}
+the parameter count. Measured on an otherwise idle GPU, its batch-one latency is
+1.84/2.22 ms against 2.44/4.04 ms for STAEformer, and its batch-eight throughput is
+4211/4235 samples s$^{-1}$, compared with 507/271 for STAEformer on the same RTX
+5060 Laptop GPU. Table~\ref{tab:efficiency}
 reports the principal local efficiency controls.
 \begin{table}[!htbp]
   \centering
@@ -1665,14 +1684,13 @@ reports the principal local efficiency controls.
         \addlegendentry{ShiftGuard}
         \addplot[fill=red!55] coordinates {(METR,1.259) (PEMS,1.372)};
         \addlegendentry{STAEformer}
-      \nextgroupplot[title={Batch-eight throughput (samples/s)},ylabel={},ymax=4100]
-        \addplot[fill=blue!60] coordinates {(METR,3567) (PEMS,3335)};
-        \addplot[fill=red!55] coordinates {(METR,503) (PEMS,269)};
+      \nextgroupplot[title={Batch-eight throughput (samples/s)},ylabel={},ymax=4800]
+        \addplot[fill=blue!60] coordinates {(METR,4211) (PEMS,4235)};
+        \addplot[fill=red!55] coordinates {(METR,507) (PEMS,271)};
     \end{groupplot}
   \end{tikzpicture}
   \caption{Efficiency comparison with the strongest local transformer.
-  \pending{throughput bars show the legacy model until re-measured.}
-  ShiftGuard uses 13.7--14.1 times fewer parameters and provides 7.1--12.4
+  ShiftGuard uses 13.7--14.1 times fewer parameters and provides 8.3--15.6
   times higher batch-eight throughput on the disclosed GPU.}
   \label{fig:efficiency-tradeoff}
 \end{figure}
@@ -1715,11 +1733,13 @@ improving average accuracy.
 \textbf{RQ4: recipe versus architecture.} Within ShiftGuard the answer is clear:
 augmentation dominates, and the router, reliability weighting, and mask input do
 not account for the gain (Section~\ref{sec:dep-ablation}). Across backbones,
-\pending{five-seed recipe-matched comparison; early results favor the recipe, with
-recipe-equipped STAEformer ahead of ShiftGuard on METR-LA on one seed}. ShiftGuard
-remains useful because it is cheap: 89k/100k parameters and,
-\pending{re-measure; legacy values:} 37/42 MiB batch-eight peak allocated memory and
-7.1 and 12.4 times the throughput of the local STAEformer on METR-LA and PEMS-BAY.
+the recipe lowers every baseline's outage MAE by 0.27--0.50 mph, and
+recipe-equipped STAEformer overtakes ShiftGuard by 0.075 and 0.045 mph
+(Section~\ref{sec:fair-comparison}). The recipe, not the architecture, carries the
+robustness. ShiftGuard remains useful because it is cheap and close: within
+0.08 mph of the best model with 89k/100k parameters, 37/42 MiB batch-eight peak
+allocated memory and 8.3 and 15.6 times the throughput of the local STAEformer on
+METR-LA and PEMS-BAY.
 
 \subsection{Why clean accuracy and deployment reliability disagree}
 The clean results illustrate why average benchmark rankings should not be
@@ -1885,8 +1905,11 @@ clean METR-LA and 0.013 mph worse on clean PEMS-BAY. Under deployment-feasible
 outages it reduces MAE relative to STAEformer by 0.26 and 0.42 mph and maintains
 better blind-sensor coverage, but the gain is small on replayed real traces,
 abstaining to a historical fallback does not lower MAE, and the risk certificate
-weakens once origins are made non-overlapping. \pending{Five-seed recipe-transfer
-result; state ShiftGuard's role accordingly.} On METR-LA's
+weakens once origins are made non-overlapping. The same recipe transfers: it lowers
+the outage MAE of five standard baselines by 0.27--0.50 mph, and with it STAEformer
+is 0.075 and 0.045 mph more accurate than ShiftGuard. ShiftGuard's role is therefore
+that of an efficient implementation of the recipe, within 0.08 mph of the best model
+at a fourteenth of its parameters. On METR-LA's
 naturally missing inputs the average gain largely disappears, but the advantage
 on silent sensors and the stability of interval coverage persist. Legacy ablations
 attribute the point gain to outage-structured augmentation rather than to

@@ -12,7 +12,12 @@ from torch import nn
 from torch.utils.data import DataLoader, TensorDataset
 
 from shiftguard.checkpointing import restore_training_state, save_training_state
-from shiftguard.registry import LEGACY_ABLATIONS, REFERENCE_ABLATIONS, shiftguard_flags
+from shiftguard.registry import (
+    CANDIDATE_MODELS,
+    LEGACY_ABLATIONS,
+    REFERENCE_ABLATIONS,
+    shiftguard_flags,
+)
 from shiftguard.metrics import horizon_metrics
 from shiftguard.models import (
     AGCRNBaseline,
@@ -68,7 +73,7 @@ BASE_MODELS = (
     "agcrn",
     "stid",
     "staeformer",
-    *dict.fromkeys(("shiftguard", *LEGACY_ABLATIONS, *REFERENCE_ABLATIONS)),
+    *dict.fromkeys(("shiftguard", *LEGACY_ABLATIONS, *REFERENCE_ABLATIONS, *CANDIDATE_MODELS)),
 )
 # Baselines retrained with ShiftGuard's structured-outage augmentation, so that
 # stress comparisons separate the training recipe from the architecture.
@@ -117,6 +122,14 @@ def build_model(name: str, nodes: int, adjacency: torch.Tensor) -> nn.Module:
         options = {}
         if "norouter" in flags:
             options["regimes"] = 1
+        if "global" in flags:
+            options["global_tokens"] = 16
+        if "tempattn" in flags:
+            options["temporal_attention"] = True
+        if "profile" in flags:
+            options["profile_anchor"] = True
+        if "wide" in flags:
+            options.update(hidden=72, graph_layers=4)
         return ShiftGuard(
             nodes,
             adjacency,

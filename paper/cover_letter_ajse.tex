@@ -1,0 +1,83 @@
+\documentclass[10pt]{letter}
+\usepackage[a4paper,margin=22mm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xcolor}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{3pt}
+\pagestyle{empty}
+
+\signature{Shishir Singh Chauhan\\Manipal University Jaipur}
+\address{Shishir Singh Chauhan\\
+Manipal University Jaipur\\
+Dehmi Kalan, Jaipur-Ajmer Expressway\\
+Jaipur 303007, Rajasthan, India}
+
+\begin{document}
+
+\begin{letter}{Professor Bassam ElAli, PhD\\
+Editor-in-Chief\\
+Arabian Journal for Science and Engineering}
+
+\opening{Dear Professor ElAli,}
+
+Please consider my manuscript, ``\textbf{ShiftGuard: Risk-Controlled
+Spatiotemporal Traffic Forecasting under Compound Regime Shifts and Sensor
+Outages},'' for publication as an Original Research Article in the
+\textit{Arabian Journal for Science and Engineering}, within AJSE-Engineering
+(Computer Science and Engineering / Systems Engineering).
+
+Reliable traffic prediction is central to intelligent transportation systems,
+yet most established forecasting benchmarks evaluate models under relatively
+stable traffic conditions and assume that sensor observations remain
+available. The submitted work addresses the more operationally realistic case
+in which traffic regimes change while sensors experience independent, burst,
+contiguous-region, or high-centrality outages. It asks not only whether a model
+can forecast accurately, but also whether it can quantify uncertainty and
+identify forecast origins at which automated decisions should be withheld.
+
+The manuscript makes three main contributions. First, it defines a
+leakage-controlled compound-shift evaluation protocol spanning two established
+traffic benchmarks, METR-LA and PEMS-BAY, four outage families, five severities,
+and five random seeds. Second, it develops ShiftGuard, which integrates
+reliability-conditioned graph-temporal encoding, structured-outage training,
+probabilistic scale estimation, and prequential group-adaptive conformal
+calibration. Third, it introduces an origin-level risk certificate that converts
+calibrated uncertainty into an operational release-or-abstain decision.
+
+The empirical study comprises 640 confirmatory stress evaluations and compares
+ShiftGuard with classical predictors and widely used neural baselines,
+including DCRNN, STGCN, Graph WaveNet, AGCRN, STID, and STAEformer. Relative to
+the strongest locally reproduced transformer, ShiftGuard reduces mean stress
+MAE from 3.74 to 3.40 mph on METR-LA and from 2.49 to 1.94 mph on PEMS-BAY. At
+30\% outage severity, the risk controller retains approximately 86\% and 98\%
+of forecast origins while limiting empirical origin-level failure to 8\% and
+2\%, respectively. The manuscript also reports the important boundary of the
+claim: ShiftGuard is effectively tied with STAEformer on clean METR-LA and is
+0.027 mph worse on clean PEMS-BAY. Thus, the contribution is robust and
+risk-aware operation under compound shifts, rather than an unsupported claim
+of universal clean-data superiority.
+
+This work fits AJSE's scope in computer science, systems engineering, and
+transportation-oriented engineering applications by combining a technically
+new forecasting and risk-control pipeline with reproducible evaluation and
+clear operational implications. The complete implementation is publicly
+available at \href{https://github.com/shishirbit/ShiftGuard-ITS}{github.com/shishirbit/ShiftGuard-ITS},
+and the manuscript provides official access information for both datasets.
+
+I confirm that this manuscript is original, has not been published previously,
+and is not under consideration by another journal. I am the sole author and
+have approved its submission. The study uses previously published benchmark
+data and involves no human participants, human samples, or animals. All
+reported claims are supported by the submitted manuscript and reproducibility
+materials.
+
+Thank you for considering this work. I believe it will interest AJSE readers
+working in intelligent transportation, spatiotemporal machine learning,
+reliable artificial intelligence, and engineering decision support.
+
+\closing{Sincerely,}
+
+\end{letter}
+\end{document}

@@ -37,6 +37,8 @@ def main() -> None:
     parser.add_argument("--rate", type=float, default=0.3)
     parser.add_argument("--artifact-root", type=Path, default=Path("artifacts"))
     parser.add_argument("--data-root", type=Path, default=Path("data/processed"))
+    parser.add_argument("--variants", nargs="+", default=list(VARIANTS))
+    parser.add_argument("--output", default="validation_model_selection.json")
     args = parser.parse_args()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     rows = []
@@ -55,7 +57,7 @@ def main() -> None:
             "region": region_mask(shape, args.rate, adjacency, rng),
             "hub": hub_mask(shape, args.rate, adjacency),
         }
-        for variant in VARIANTS:
+        for variant in args.variants:
             for seed in args.seeds:
                 checkpoint = args.artifact_root / dataset / variant / f"seed_{seed}" / "best.pt"
                 if not checkpoint.exists():
@@ -71,7 +73,7 @@ def main() -> None:
                 print(json.dumps(row), flush=True)
     destination = args.artifact_root / "summary"
     destination.mkdir(parents=True, exist_ok=True)
-    (destination / "validation_model_selection.json").write_text(
+    (destination / args.output).write_text(
         json.dumps({"rate": args.rate, "mask_seed": VALIDATION_MASK_SEED, "runs": rows}, indent=2),
         encoding="utf-8",
     )

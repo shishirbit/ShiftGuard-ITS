@@ -36,7 +36,27 @@ LEGACY_ABLATIONS = (
     "shiftguard_noaugmentation",
     "shiftguard_independentaugmentation",
 )
+# Architecture candidates screened after the recipe comparison showed a
+# recipe-equipped STAEformer ahead of the reference. They are ranked by
+# scripts/validation_model_selection.py on validation data only.
+CANDIDATE_MODELS = tuple(
+    f"{REFERENCE_MODEL}_{flags}"
+    for flags in (
+        "global",
+        "tempattn",
+        "global_tempattn",
+        "global_tempattn_norouter",
+        "global_tempattn_wide",
+        # Second round, after the first left region outages as the gap.
+        "global_profile",
+        "global_tempattn_norouter_profile",
+    )
+)
 SHIFTGUARD_FLAGS = (
+    "global",
+    "profile",
+    "tempattn",
+    "wide",
     "noreliability",
     "staticgraph",
     "adaptivegraph",

@@ -63,7 +63,9 @@ Averaged over five outage scenarios, ShiftGuard's mean absolute error is 3.23 an
 1.80 mph on METR-LA and PEMS-BAY, against 3.48 and 2.22 mph for STAEformer, the
 strongest published baseline we reproduced, using about 14 times fewer parameters.
 It releases 97\% and 99.7\% of forecasts with 8.2\% and 1.6\% failure. When the
-baselines receive the same recipe, \pending{final five-seed transfer result}. The
+baselines receive the same recipe, their error falls by 0.27--0.50 mph, and
+recipe-equipped STAEformer becomes 0.05--0.08 mph more accurate than ShiftGuard: the
+robustness belongs to the recipe, and ShiftGuard is its efficient implementation. The
 manuscript also reports results that limit these claims: the gain is small on
 replayed real outage traces, abstaining to a historical fallback did not lower error,
 the risk target is missed during METR-LA region outages and network-wide dropouts,

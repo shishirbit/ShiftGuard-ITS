@@ -323,6 +323,72 @@ class ReliabilityGraphBlock(nn.Module):
         return self.norm(features + self.dropout(F.gelu(updated)))
 
 
+class GlobalTokenBlock(nn.Module):
+    """Long-range spatial mixing through a few learned anchor tokens.
+
+    Graph propagation only reaches neighbours, which are dark together during a
+    region outage. Anchors pool over every sensor and broadcast back, so distant
+    working sensors can inform the outage, at O(N * tokens) cost. Keys also see
+    each sender's observed fraction, so the model learns how far to trust it.
+    """
+
+    def __init__(self, width: int, tokens: int = 16, heads: int = 4, dropout: float = 0.1) -> None:
+        super().__init__()
+        self.heads = heads
+        self.anchors = nn.Parameter(torch.randn(tokens, width) * 0.02)
+        self.pool_key = nn.Linear(width + 1, width)
+        self.pool_value = nn.Linear(width + 1, width)
+        self.query = nn.Linear(width, width)
+        self.gate = nn.Linear(width * 2, width)
+        self.norm = nn.LayerNorm(width)
+        self.dropout = nn.Dropout(dropout)
+
+    def _split(self, tensor: torch.Tensor) -> torch.Tensor:
+        batch, length, width = tensor.shape
+        return tensor.view(batch, length, self.heads, width // self.heads).transpose(1, 2)
+
+    def _merge(self, tensor: torch.Tensor) -> torch.Tensor:
+        batch, _, length, head_width = tensor.shape
+        return tensor.transpose(1, 2).reshape(batch, length, self.heads * head_width)
+
+    def forward(self, features: torch.Tensor, reliability: torch.Tensor) -> torch.Tensor:
+        # features: B,N,D; reliability: B,N,1
+        senders = torch.cat([features, reliability], dim=-1)
+        anchors = self.anchors.unsqueeze(0).expand(len(features), -1, -1)
+        pooled = F.scaled_dot_product_attention(
+            self._split(anchors), self._split(self.pool_key(senders)), self._split(self.pool_value(senders))
+        )
+        pooled = self._merge(pooled)
+        broadcast = self._merge(
+            F.scaled_dot_product_attention(
+                self._split(self.query(features)), self._split(pooled), self._split(pooled)
+            )
+        )
+        gate = torch.sigmoid(self.gate(torch.cat([features, broadcast], dim=-1)))
+        return self.norm(features + self.dropout(gate * broadcast))
+
+
+class TemporalAttentionEncoder(nn.Module):
+    """Per-sensor self-attention over the input window, replacing the MLP."""
+
+    def __init__(self, history: int, width: int, heads: int = 4, dropout: float = 0.1) -> None:
+        super().__init__()
+        self.step = nn.Linear(2, width)
+        self.position = nn.Parameter(torch.randn(history, width) * 0.02)
+        self.layer = nn.TransformerEncoderLayer(
+            width, heads, 2 * width, dropout, activation="gelu", batch_first=True, norm_first=True
+        )
+        self.out = nn.Linear(2 * width, width)
+
+    def forward(self, values: torch.Tensor, observed: torch.Tensor) -> torch.Tensor:
+        # values, observed: B,T,N -> B,N,D
+        batch, steps, nodes = values.shape
+        tokens = torch.stack([values, observed], dim=-1).permute(0, 2, 1, 3).reshape(batch * nodes, steps, 2)
+        hidden = self.layer(self.step(tokens) + self.position)
+        summary = torch.cat([hidden[:, -1], hidden.mean(1)], dim=-1)
+        return self.out(summary).view(batch, nodes, -1)
+
+
 class ShiftGuard(nn.Module):
     """Reliability-conditioned graph-temporal forecaster.
 
@@ -346,6 +412,9 @@ class ShiftGuard(nn.Module):
         use_static_adjacency: bool = True,
         use_adaptive_adjacency: bool = True,
         use_mask_input: bool = True,
+        global_tokens: int = 0,
+        temporal_attention: bool = False,
+        profile_anchor: bool = False,
     ) -> None:
         super().__init__()
         if adjacency.shape != (nodes, nodes):
@@ -364,14 +433,22 @@ class ShiftGuard(nn.Module):
         self.node_target = nn.Parameter(torch.randn(nodes, 16) * 0.02)
         self.time_embedding = nn.Embedding(288, hidden)
         self.day_embedding = nn.Embedding(7, hidden)
-        self.temporal = nn.Sequential(
-            nn.Linear(history * 2, hidden),
-            nn.GELU(),
-            nn.Dropout(dropout),
-            nn.Linear(hidden, hidden),
-        )
+        if temporal_attention:
+            self.temporal_attention = TemporalAttentionEncoder(history, hidden, dropout=dropout)
+        else:
+            self.temporal = nn.Sequential(
+                nn.Linear(history * 2, hidden),
+                nn.GELU(),
+                nn.Dropout(dropout),
+                nn.Linear(hidden, hidden),
+            )
         self.blocks = nn.ModuleList(
             [ReliabilityGraphBlock(hidden, dropout) for _ in range(graph_layers)]
+        )
+        self.global_blocks = nn.ModuleList(
+            [GlobalTokenBlock(hidden, global_tokens, dropout=dropout) for _ in range(graph_layers)]
+            if global_tokens
+            else []
         )
         self.regime_router = nn.Sequential(
             nn.Linear(4, hidden // 2), nn.GELU(), nn.Linear(hidden // 2, regimes)
@@ -380,6 +457,11 @@ class ShiftGuard(nn.Module):
         self.scale_heads = nn.ModuleList([nn.Linear(hidden, horizon) for _ in range(regimes)])
         self.history_skip = nn.Linear(history, horizon, bias=False)
         nn.init.zeros_(self.history_skip.weight)
+        if profile_anchor:
+            # Sensor-by-time-of-day level, the anchor for sensors dark all window.
+            self.profile = nn.Sequential(
+                nn.Linear(hidden * 2, hidden), nn.GELU(), nn.Linear(hidden, 1)
+            )
 
     def _adjacency(self, reliability: torch.Tensor) -> torch.Tensor:
         adaptive = torch.softmax(F.relu(self.node_source @ self.node_target.T), dim=-1)
@@ -408,22 +490,43 @@ class ShiftGuard(nn.Module):
             observed = torch.ones_like(observed)
         reliability = observed.mean(dim=1).squeeze(-1).unsqueeze(-1)
         graph_reliability = reliability if self.use_reliability else torch.ones_like(reliability)
-        encoded = torch.cat([values[..., 0], observed[..., 0]], dim=1)
-        encoded = encoded.permute(0, 2, 1)
-        features = self.temporal(encoded)
+        if hasattr(self, "temporal_attention"):
+            features = self.temporal_attention(values[..., 0], observed[..., 0])
+        else:
+            encoded = torch.cat([values[..., 0], observed[..., 0]], dim=1)
+            features = self.temporal(encoded.permute(0, 2, 1))
         features = features + self.node_embedding[None]
+        calendar = None
         if x.shape[-1] >= 4:
             time_index = (x[:, -1, 0, 2] * 288).long().clamp(0, 287)
             day_index = (x[:, -1, 0, 3] * 6).round().long().clamp(0, 6)
-            features = features + (
-                self.time_embedding(time_index) + self.day_embedding(day_index)
-            )[:, None, :]
+            calendar = self.time_embedding(time_index) + self.day_embedding(day_index)
+            features = features + calendar[:, None, :]
         adjacency = self._adjacency(graph_reliability)
-        for block in self.blocks:
+        for index, block in enumerate(self.blocks):
             features = block(features, adjacency, graph_reliability)
+            if self.global_blocks:
+                features = self.global_blocks[index](features, reliability)
 
         last = values[:, -1, :, 0]
-        diff = values[:, 1:, :, 0] - values[:, :-1, :, 0]
+        if hasattr(self, "profile"):
+            # Anchor on the last observed value, not the zero-filled last step.
+            seen = observed[..., 0]
+            steps = torch.arange(1, seen.shape[1] + 1, device=seen.device, dtype=seen.dtype)
+            latest = (seen * steps[None, :, None]).argmax(dim=1, keepdim=True)
+            last = values[..., 0].gather(1, latest).squeeze(1)
+            if calendar is None:
+                calendar = torch.zeros_like(self.node_embedding[:1]).expand(len(x), -1)
+            context = torch.cat(
+                [
+                    self.node_embedding[None].expand(len(x), -1, -1),
+                    calendar[:, None, :].expand(-1, self.nodes, -1),
+                ],
+                dim=-1,
+            )
+            level = self.profile(context).squeeze(-1)
+            last = torch.where(seen.sum(1) > 0, last, level)
+        diff =values[:, 1:, :, 0] - values[:, :-1, :, 0]
         regime_stats = torch.stack(
             [
                 values[..., 0].mean((1, 2)),
